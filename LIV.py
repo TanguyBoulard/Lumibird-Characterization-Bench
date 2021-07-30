@@ -2,10 +2,10 @@
 # LIV CONDITIONS
 # =============================================================================
 
-numero = '1074 avant burn-in'
+numero = '1146 après burn-in'
 
 name = 'LD-PD'
-wavelength = '0980' #nm
+wavelength = '0980' #nm format 0000
 T = 25.0 #°C
 SLOT_T = 1
 I_start = 0 #mA
@@ -78,7 +78,7 @@ def PRO8000WaitUntilSet_T(T):
         print('T = %.2f°C' %(float(pro8000.query(':TEMP:ACT?')[10:])))
         if (T-T*(5/100) <= (float(pro8000.query(':TEMP:ACT?')[10:])) <= T+T*(5/100)):
             break
-        time.sleep(1)
+        time.sleep(20)
 
 def PRO8000WaitUntilSet_I(I):
     for i in range (50000):

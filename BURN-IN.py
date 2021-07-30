@@ -91,7 +91,8 @@ Timer(int(t), pro8000)
 # =============================================================================
 
 pro8000.write(':SLOT %i' %SLOT_T)
-pro8000.write(':TEC OFF')
+pro8000.write(':TEMP:SET 25.0')
+# pro8000.write(':TEC OFF')
 PRO8000Error()
 
 pro8000.write(':SLOT %i' %SLOT_LD)

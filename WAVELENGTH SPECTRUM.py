@@ -2,17 +2,17 @@
 # WAVELENGTH SPECTRUM CONDITIONS
 # =============================================================================
 
-numero = '1074 après burn-in'
+numero = '1146 après burn-in'
 
 name = 'NEOPHOTONICS'
-T = 29.0 #°C
+T = 25.0 #°C
 SLOT_T = 1
 I_start = 200 #mA
 I_end = 500 #mA
 pas = 100 #mA
 SLOT_LD = 3
 PRO8000_offset = 5.0 #mA
-Center = 1550.0 #nm
+Center = 974.0 #nm
 Span = 20.0 #nm
 VBW = 1000 #Hz
 res = 0.07 #nm
@@ -31,6 +31,8 @@ import time
 import numpy as np
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
+import pandas as pd
+from scipy.signal import argrelextrema
 
 # =============================================================================
 # FOLDER
@@ -73,13 +75,18 @@ def FindPeaks(data):
         maximum[i].append(data[0][peaks[max_indexes[0][0]]])
     return(maximum)
 
+def SignalProcessing(X, Y, nb):
+    peakind = argrelextrema(Y, np.greater)
+    return pd.DataFrame([Y[i] for i in peakind][0], [X[i] for i in peakind][0]).rolling(nb).max()
+
 def Plot(data, title, URL):
     normalize_level = []
     for i in range(len(data[1])):
+        process = SignalProcessing(np.array(data[0]), np.array(data[1][i]), 3)
         peaks = FindPeaks(data)
         normalize_level.append(Normalize(np.array(data[1][i])))
         color = (random.random(), random.random(), random.random())
-        plt.plot(data[0], normalize_level[i], label='peak: %.2f' %peaks[i][0], color=color)
+        plt.plot(process, label='peak: %.2f' %peaks[i][0], color=color)
     plt.title(title)
     plt.xlabel("Wavelength (nm)")
     plt.ylabel("Level (dB)")
@@ -104,7 +111,7 @@ def PRO8000WaitUntilSet_T(T):
         print('%f°C' %(float(pro8000.query(':TEMP:ACT?')[10:])))
         if (T-T*(5/100) <= (float(pro8000.query(':TEMP:ACT?')[10:])) <= T+T*(5/100)):
             break
-        time.sleep(1)
+        time.sleep(20)
 
 def PRO8000WaitUntilSet_I(I):
     for i in range (50000):
@@ -150,7 +157,7 @@ I = []
 for i in range(I_start, I_end+pas, pas):
     I.append(i)
 
-X = np.linspace(Center-(Span/2), Center+(Span/2), 2001)
+X = np.linspace(Center-(Span/2), Center+(Span/2), Smppnt)
 lbd = []
 curve = []
 
@@ -187,7 +194,7 @@ if osa.query('*IDN?') != 'ANRITSU,MS9710B,0,V3.11&V3.8\r\n':
     print('OSA not connected')
     sys.exit()
 osa.clear()
-# OSAWaitUntilEvent_RST()
+OSAWaitUntilEvent_RST()
 osa.write('*CLS;HEAD OFF')
 
 if not os.path.exists(Directory):
