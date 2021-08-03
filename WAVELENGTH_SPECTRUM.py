@@ -1,8 +1,3 @@
-SLOT_T = 1
-SLOT_LD = 3
-PRO8000_offset = 5.0 #mA
-RLV = 2.51
-
 import os
 import sys
 import pyvisa
@@ -37,24 +32,27 @@ def FindPeaks(data):
 
 def SignalProcessing(X, Y, nb):
     peakind = argrelextrema(Y, np.greater)
-    return pd.DataFrame([Y[i] for i in peakind][0], [X[i] for i in peakind][0]).rolling(nb).max()
+    df = pd.DataFrame([Y[i] for i in peakind][0], [X[i] for i in peakind][0]).rolling(nb).max()
+    return df.to_numpy()
 
 def Plot(data, title, URL):
+    fig, axs = plt.subplots(1)
+    fig.suptitle(title)
     normalize_level = []
     for i in range(len(data[1])):
         process = SignalProcessing(np.array(data[0]), np.array(data[1][i]), 3)
         peaks = FindPeaks(data)
-        normalize_level.append(Normalize(np.array(data[1][i])))
+        normalize_level.append(Normalize(np.array(process[1])))
         color = (random.random(), random.random(), random.random())
-        plt.plot(process, label='peak: %.2f' %peaks[i][0], color=color)
-    plt.title(title)
-    plt.xlabel("Wavelength (nm)")
-    plt.ylabel("Level (dB)")
-    plt.legend()
+        axs.plot(process, label='peak: %.2f' %peaks[i][0], color=color)
+
+    axs.set_xlabel("Wavelength (nm)")
+    axs.set_ylabel("Level (dB)")
+    axs.legend()
     plt.savefig(URL, dpi=150)
 
-def Print(file, data, title):
-    file = open(file,"w")
+def Print(file0, data, title):
+    file = open(file0,"w")
     file.writelines(title)
     file.writelines('\n\nI\t\tlbd')
     for i in range(len(data[0])):
@@ -113,7 +111,13 @@ def OSAConversion(data):
         data[i] = float(data[i])
     return data[:-1]
 
-def Connection():
+def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
+
+    SLOT_T = 1
+    SLOT_LD = 3
+    PRO8000_offset = 5.0 #mA
+    RLV = 2.51
+
     rm = pyvisa.ResourceManager()
     # print(rm.list_resources())
 
@@ -141,14 +145,8 @@ def Connection():
         print('OSA not connected')
         sys.exit()
     osa.clear()
-    OSAWaitUntilEvent_RST()
+    # OSAWaitUntilEvent_RST(osa)
     osa.write('*CLS;HEAD OFF')
-
-    return pro8000, osa
-
-def Initialize(I_start, T, wavelength, Span, VBW, res, Smppnt):
-
-    pro8000, osa = Connection()
 
         #PRO8000
     pro8000.write(':SLOT %i' %SLOT_T)
@@ -158,7 +156,10 @@ def Initialize(I_start, T, wavelength, Span, VBW, res, Smppnt):
     PRO8000Error(pro8000)
 
     pro8000.write(':SLOT %i' %SLOT_LD)
-    value = I_start + PRO8000_offset #aucune idée de pourquoi un offset de 5
+    if I_start != 0:
+        value = I_start + PRO8000_offset #aucune idée de pourquoi un offset de 5
+    else:
+        value = I_start
     pro8000.write(':ILD:SET %fE-3' %value)
     pro8000.write(':LASER ON')
     PRO8000WaitUntilSet_I(pro8000, I_start)
@@ -177,12 +178,6 @@ def Initialize(I_start, T, wavelength, Span, VBW, res, Smppnt):
     osa.write('PKS PEAK')
     osa.write('GCL')
     OSAError(osa)
-    
-    return pro8000, osa
-
-def Acquisition(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
-
-    pro8000, osa = Initialize(I_start, T, wavelength, Span, VBW, res, Smppnt)   
 
     Number = str("%s/" %name)
     Folder = str("Wavelength Spectrum")
@@ -190,21 +185,24 @@ def Acquisition(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smpp
     Directory = os.path.join(Number, Folder)
     if not os.path.exists(Directory):
         os.makedirs(Directory, mode)
-        title = str("%s Wavelength Spectrum {T=%f°C}" %(name, T))
-        file = str("%s/Wavelength Spectrum.txt" %Directory)
-        URL = str("%s/Wavelength Spectrum.png" %Directory)
-        
+    title = str("%s Wavelength Spectrum {T=%.2f°C}" %(name, T))
+    file = str("%s/Wavelength Spectrum.txt" %Directory)
+    URL = str("%s/Wavelength Spectrum.png" %Directory)
+
     I = []
     for i in range(I_start, I_end+I_pas, I_pas):
         I.append(i)
 
     X = np.linspace(wavelength-(Span/2), wavelength+(Span/2), Smppnt)
     lbd = []
-    curve = []    
-    
+    curve = []
+
     for element in I:
         pro8000.write(':SLOT %i' %SLOT_LD)
-        value = element + PRO8000_offset #aucune idée de pourquoi un offset de 5
+        if I_start != 0:
+            value = element + PRO8000_offset #aucune idée de pourquoi un offset de 5
+        else:
+            value = element
         pro8000.write(':ILD:SET %fE-3' %value)
         PRO8000WaitUntilSet_I(pro8000, element)
         PRO8000Error(pro8000)
@@ -216,13 +214,7 @@ def Acquisition(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smpp
 
     Print(file, [I, lbd], title)
     Plot([X, curve], title, URL)
-    
-    return pro8000, osa
 
-def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
-    
-    pro8000, osa = Acquisition(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt)
-    
         #PRO8000
     pro8000.write(':SLOT %i' %SLOT_T)
     pro8000.write(':TEC OFF')
@@ -239,11 +231,15 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     osa.write('EMK')
     osa.write('GCL')
     osa.write('ZMK ERS')
-    osa.close() 
+    osa.close()
 
 def Stop():
+
+    SLOT_T = 1
+    SLOT_LD = 3
+
     rm = pyvisa.ResourceManager()
-    
+
         #PRO8000
     pro8000 = rm.open_resource('ASRL8::INSTR')
     pro8000.write(':SLOT %i' %SLOT_T)
@@ -262,6 +258,6 @@ def Stop():
     osa.write('EMK')
     osa.write('GCL')
     osa.write('ZMK ERS')
-    osa.close() 
-    
+    osa.close()
+
     sys.exit()

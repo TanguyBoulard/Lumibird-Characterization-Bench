@@ -54,7 +54,7 @@ def Connection():
 def Initialize(I, T, t):
 
     pro8000 = Connection()
-    
+
     pro8000.write(':SLOT %i' %SLOT_T)
     pro8000.write(':TEMP:SET %f' %T)
     pro8000.write(':TEC ON')
@@ -69,13 +69,13 @@ def Initialize(I, T, t):
     PRO8000Error(pro8000)
 
     Timer(int(t), pro8000)
-    
+
     return pro8000
 
 def End(I, T, t):
-    
+
     pro8000 = Initialize(I, T, t)
-    
+
     pro8000.write(':SLOT %i' %SLOT_T)
     pro8000.write(':TEC OFF')
     PRO8000Error(pro8000)
@@ -85,8 +85,8 @@ def End(I, T, t):
     PRO8000Error(pro8000)
 
     pro8000.write('*RST')
-    pro8000.close(pro8000)
-    
+    pro8000.close()
+
 def Stop():
     rm = pyvisa.ResourceManager()
 
@@ -100,5 +100,5 @@ def Stop():
     PRO8000Error(pro8000)
 
     pro8000.write('*RST')
-    pro8000.close(pro8000)
+    pro8000.close()
     sys.exit()

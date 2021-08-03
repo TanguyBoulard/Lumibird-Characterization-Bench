@@ -53,7 +53,18 @@ def PRO8000WaitUntilSet_I(instrument, I):
             break
         time.sleep(1)
 
-def Connection():
+def Data(name, I_start, I_end, I_pas, T, wavelength):
+
+    Name = str("%s/" %name)
+    Folder = str("Light-Current-Voltage Characteristics")
+    mode = 0o666
+    Directory = os.path.join(Name, Folder)
+    if not os.path.exists(Directory):
+        os.makedirs(Directory, mode)
+    title = str("%s Light-Current-Voltage Characteristics {T=%.2f°C}" %(name, T))
+    file = str("%s/Light-Current-Voltage Characteristics.txt" %Directory)
+    URL = str("%s/Light-Current-Voltage Characteristics.png" %Directory)
+
     rm = pyvisa.ResourceManager()
     # print(rm.list_resources())
 
@@ -92,13 +103,6 @@ def Connection():
         print('Gentec-eo U-link not connected')
         sys.exit()
     bolometer.clear()
-    bolometer.write('*RST')
-    
-    return pro8000, multimeter, bolometer
-
-def Initialize(I_start, T, wavelength):
-
-    pro8000, multimeter, bolometer = Connection()
 
         #PRO8000
     pro8000.write(':SLOT %i' %SLOT_T)
@@ -108,8 +112,10 @@ def Initialize(I_start, T, wavelength):
     PRO8000Error(pro8000)
 
     pro8000.write(':SLOT %i' %SLOT_LD)
-    if I_start != 0:
+    if I_start != 0 and I_start != 10:
         value = I_start + PRO8000_offset #aucune idée de pourquoi un offset de 5
+    elif I_start == 10:
+        value = I_start + 5
     else:
         value = I_start
     pro8000.write(':ILD:SET %fE-3' %value)
@@ -126,36 +132,26 @@ def Initialize(I_start, T, wavelength):
     bolometer.query('*CFT')
     bolometer.query('*CMX')
     bolometer.query('*FAS')
+    l = len(str(wavelength))
+    if l != 4:
+        for i in range(l):
+            wavelength = '0'+wavelength[:]
     bolometer.query('*PWC%s' %str(wavelength))
     bolometer.query('*MUL10.0E+00')
     bolometer.write('*CVU')
     bolometer.read() #ACK
     offset = float(bolometer.read()) #VALUE
-    
-    return pro8000, multimeter, bolometer, offset
 
-def Acquisition(name, I_start, I_end, I_pas, T, wavelength):
-
-    Name = str("%s/" %name)
-    Folder = str("Light-Current-Voltage Characteristics")
-    mode = 0o666
-    Directory = os.path.join(Name, Folder)
-    if not os.path.exists(Directory):
-        os.makedirs(Directory, mode)
-    title = str("%s Light-Current-Voltage Characteristics {T=%f°C}" %(name, T))
-    file = str("%s/Light-Current-Voltage Characteristics.txt" %Directory)
-    URL = str("%s/Light-Current-Voltage Characteristics.png" %Directory)    
-
-    pro8000 , multimeter, bolometer, offset = Initialize(I_start, T, wavelength)
-    
-    I = [i for i in range(I_start, I_end+I_pas, I_pas)]
+    I = [i for i in range(I_start, I_end+int(I_pas), int(I_pas))]
     U = []
     P_opt = []
-    
+
     for element in I:
         pro8000.write(':SLOT %i' %SLOT_LD)
-        if element != 0:
+        if element != 0 and I_start != 10:
             value = element + PRO8000_offset #aucune idée de pourquoi un offset de 5
+        elif I_start == 10:
+            value = element + 5 #aucune idée de pourquoi un offset de 8
         else:
             value = element
         pro8000.write(':ILD:SET %fE-3' %value)
@@ -164,40 +160,14 @@ def Acquisition(name, I_start, I_end, I_pas, T, wavelength):
         bolometer.write('*CVU')
         bolometer.read() #ACK
         P_opt.append(float(bolometer.read())*1E3) #VALUE
-    
+
     data = [I, U, P_opt]
     Plot(data, title, URL)
     Print(file, data, title)
-    
-    return pro8000, multimeter, bolometer
-
-def Data(name, I_start, I_end, I_pas, T, wavelength):
-
-    pro8000, multimeter, bolometer = Acquisition(name, I_start, I_end, I_pas, T, wavelength)
-
-        #PRO8000
-    pro8000.write(':SLOT %i' %SLOT_T)
-    pro8000.write(':TEC OFF')
-    PRO8000Error(pro8000)
-
-    pro8000.write(':SLOT %i' %SLOT_LD)
-    pro8000.write(':LASER OFF')
-    PRO8000Error(pro8000)
-
-    pro8000.write('*RST')
-    pro8000.close()
-
-        #MULTIMETER
-    multimeter.write('*RST')
-    multimeter.close()
-
-        #BOLOMETER
-    bolometer.write('*RST')
-    bolometer.close()
 
 def Stop():
     rm = pyvisa.ResourceManager()
-    
+
         #PRO8000
     pro8000 = rm.open_resource('ASRL8::INSTR')
     pro8000.write(':SLOT %i' %SLOT_T)
@@ -220,5 +190,3 @@ def Stop():
     bolometer = rm.open_resource('ASRL5::INSTR')
     bolometer.write('*RST')
     bolometer.close()
-    
-    sys.exit()
