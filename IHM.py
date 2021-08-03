@@ -136,11 +136,11 @@ class Characterization(tk.Toplevel):
         text_span_unit.grid(row=0, column=2, sticky="w")
 
         # VBW ([4,5],[0,1]) -> (0,[3,4,5])
-        VBW_option_list = [10, 100, 1000]
+        VBW_option_list = [1E1, 1E2, 1E3, 1E4, 1E5, 1E6]
         text_VBW = tk.Label(self.lf_OSA, text="Fréquence d'échantillonnage :")
         text_VBW.grid(row=0, column=3, sticky="e")
         input_VBW = tk.StringVar(self.lf_OSA)
-        input_VBW.set(VBW_option_list[0])
+        input_VBW.set(VBW_option_list[2])
         self.command.append(input_VBW)
         opt_VBW = tk.OptionMenu(self.lf_OSA, input_VBW, *VBW_option_list)
         opt_VBW.grid(row=0, column=4, sticky="nesw")
@@ -148,11 +148,11 @@ class Characterization(tk.Toplevel):
         text_VBW_unit.grid(row=0, column=5, sticky="w")
 
         # Resolution ([4,5],[0,1]) -> (1,[0,1,2])
-        Resolution_option_list = [1, 0.07]
+        Resolution_option_list = [1,0.5,0.2,0.1,0.07]
         text_Resolution = tk.Label(self.lf_OSA, text="Résolution :")
         text_Resolution.grid(row=1, column=0, sticky="e")
         input_Resolution = tk.StringVar(self.lf_OSA)
-        input_Resolution.set(Resolution_option_list[0])
+        input_Resolution.set(Resolution_option_list[-1])
         self.command.append(input_Resolution)
         opt_Resolution = tk.OptionMenu(
             self.lf_OSA, input_Resolution, *Resolution_option_list
@@ -162,11 +162,11 @@ class Characterization(tk.Toplevel):
         text_Resolution_unit.grid(row=1, column=2, sticky="w")
 
         # Sampling Points ([4,5],[0,1]) -> (1,[3,4,5])
-        Smppnt_option_list = [2001]
+        Smppnt_option_list = [51,101,251,501,1001,2001,5001]
         text_Smppnt = tk.Label(self.lf_OSA, text="Nombre de points :")
         text_Smppnt.grid(row=1, column=3, sticky="e")
         input_Smppnt = tk.StringVar(self.lf_OSA)
-        input_Smppnt.set(Smppnt_option_list[0])
+        input_Smppnt.set(Smppnt_option_list[-2])
         self.command.append(input_Smppnt)
         opt_Smppnt = tk.OptionMenu(self.lf_OSA, input_Smppnt, *Smppnt_option_list)
         opt_Smppnt.grid(row=1, column=4, sticky="nesw")
@@ -222,7 +222,7 @@ class Characterization(tk.Toplevel):
             self.text_error.config(text="Merci de remplir toutes les cases")
             flag = 0
         else:
-            self.button_start.config(text="FIN", command=self.destroy)
+            self.button_start.config(text="EN COURS", command=self.destroy)
             self.text_error.config(text="")
             flag = 1
         if flag == 1:
@@ -246,6 +246,8 @@ class Characterization(tk.Toplevel):
                 float(conditions[10]),
                 int(conditions[11]),
             )
+            self.button_start.config(text="FIN", command=self.destroy)
+            self.text_error.config(text="")
 
 
 class BurnInStart:
@@ -335,11 +337,13 @@ class BurnIn(tk.Toplevel):
             self.text_error.config(text="Merci de remplir toutes les cases")
             flag = 0
         else:
-            self.button_start.config(text="FIN", command=self.destroy)
+            self.button_start.config(text="EN COURS", command=self.destroy)
             self.text_error.config(text="")
             flag = 1
         if flag == 1:
             BurnInStart.Start(conditions[1], conditions[0], conditions[2])
+            self.button_start.config(text="FIN", command=self.destroy)
+            self.text_error.config(text="")
 
 
 class App(tk.Tk):
