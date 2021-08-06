@@ -392,7 +392,8 @@ class App(tk.Tk):
         window.grab_set()
 
     def OpenBurnIn(self):
-        window = BurnIn(self)
+        window = TIMER.Timer
+        # window = BurnIn(self)
         window.grab_set()
 
 
