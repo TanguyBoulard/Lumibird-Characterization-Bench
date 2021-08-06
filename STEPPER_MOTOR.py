@@ -5,18 +5,21 @@ from adafruit_motor import stepper
 from adafruit_motorkit import MotorKit
 import supervisor
 
+# Stepper motor 1 : bolometer
+# Stepper motor 2 : sphere
+
 kit = MotorKit(i2c=board.I2C())
 angle_sphere = 100
 angle_bolometer = 100
 
 def BolometerIn(angle_bolometer):
     for i in range(angle_bolometer):
-        kit.stepper2.onestep(direction=stepper.FORWARD, style=stepper.SINGLE)
+        kit.stepper1.onestep(direction=stepper.FORWARD, style=stepper.SINGLE)
         time.sleep(0.01)
         
 def BolometerOut(angle_bolometer):
     for i in range(angle_bolometer):
-        kit.stepper2.onestep(direction=stepper.BACKWARD, style=stepper.SINGLE)
+        kit.stepper1.onestep(direction=stepper.BACKWARD, style=stepper.SINGLE)
         time.sleep(0.01)
 
 def SphereIn(angle_sphere):
