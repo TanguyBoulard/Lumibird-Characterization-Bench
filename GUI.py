@@ -289,11 +289,11 @@ class BurnIn(tk.Toplevel):
 
         # Burn-in conditions
 
-        # Conditions
+            # Conditions
         self.lf_Conditions = tk.LabelFrame(self, text='Conditions')
         self.lf_Conditions.grid(row=0, column=1, sticky='nesw')
 
-        # T
+                # T
         text_temperature = tk.Label(self.lf_Conditions, text='Température :')
         text_temperature.grid(row=0, column=0, sticky='e')
         input_temperature = tk.Entry(self.lf_Conditions, textvariable='')
@@ -302,7 +302,7 @@ class BurnIn(tk.Toplevel):
         text_temperature_unit = tk.Label(self.lf_Conditions, text='°C')
         text_temperature_unit.grid(row=0, column=2, sticky='w')
 
-        # I
+                # I
         text_I = tk.Label(self.lf_Conditions, text='I :')
         text_I.grid(row=1, column=0, sticky='e')
         input_I = tk.Entry(self.lf_Conditions, textvariable='')
@@ -311,14 +311,28 @@ class BurnIn(tk.Toplevel):
         text_I_unit = tk.Label(self.lf_Conditions, text='mA')
         text_I_unit.grid(row=1, column=2, sticky='w')
 
-        # t
+                # hours
         text_time = tk.Label(self.lf_Conditions, text='Temps :')
         text_time.grid(row=2, column=0, sticky='e')
         input_time = tk.Entry(self.lf_Conditions, textvariable='')
         self.command.append(input_time)
         input_time.grid(row=2, column=1, sticky='nesw')
-        text_time_unit = tk.Label(self.lf_Conditions, text='s')
+        text_time_unit = tk.Label(self.lf_Conditions, text='h')
         text_time_unit.grid(row=2, column=2, sticky='w')
+        
+                # minutes
+        input_time = tk.Entry(self.lf_Conditions, textvariable='')
+        self.command.append(input_time)
+        input_time.grid(row=2, column=3, sticky='nesw')
+        text_time_unit = tk.Label(self.lf_Conditions, text='min')
+        text_time_unit.grid(row=2, column=4, sticky='w')
+        
+                # seconds
+        input_time = tk.Entry(self.lf_Conditions, textvariable='')
+        self.command.append(input_time)
+        input_time.grid(row=2, column=5, sticky='nesw')
+        text_time_unit = tk.Label(self.lf_Conditions, text='s')
+        text_time_unit.grid(row=2, column=6, sticky='w')
 
         # Start
         self.button_start = tk.Button(self.lf_state_display, text='START', command=partial(self.UpdateState, self.command))
@@ -348,9 +362,10 @@ class BurnIn(tk.Toplevel):
             self.text_error.config(text='')
             flag = 1
         if flag == 1:
+            print(conditions)
             ARDUINO.Write(b'a\r\n') # Bolometer in
             time.sleep(5)
-            BURN_IN.main(conditions[1], conditions[0], conditions[2])
+            BURN_IN.main(conditions[1], conditions[0], conditions[2], conditions[3], conditions[4])
             ARDUINO.Write(b'b\r\n') # Bolometer out
             time.sleep(5)
             self.button_start.config(text="FIN", command=self.destroy)
