@@ -9,35 +9,33 @@
 # MODULES
 # =============================================================================
 
-import PRO8000
-
-import pyvisa
-import sys
+import serial
 import time
 
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
 
-def Timer(t):
-    while t:
-        mins, secs = divmod(t, 60)
-        timer = "{:02d}:{:02d}".format(mins, secs)
-        print(timer, end='\n\r')
-        time.sleep(1)
-        t -= 1
-    print('FIN')
+def OpenPort():
+    port = serial.Serial('COM16', 115200)
+    if not port.isOpen():
+        port.open()
+    port.flush()
+    return port
+
+def Write(port, command):
+    port.write(command)
+    for _ in range(len(command)):
+       port.read() # Read the loopback chars and ignore
     return 1
 
-def main(I, T, t):
-
-    pro8000 = PRO8000.Initialize(T, I)
-    Timer(int(t))
-    PRO8000.Close(pro8000)
-    
-
-def Stop():
-    rm = pyvisa.ResourceManager()
-    pro8000 = rm.open_resource("ASRL8::INSTR")
-    PRO8000.Close(pro8000)
-    sys.exit()
+def Read(port):
+    while True:
+        reply = b''
+        a = port.read()
+        if a == b'\r':
+            break
+        else:
+            reply += a
+            time.sleep(0.01)
+    return reply
