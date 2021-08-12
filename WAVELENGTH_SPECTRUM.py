@@ -62,7 +62,7 @@ def SignalProcessing(X, Y, nb):
     return df.to_numpy()
     return 1
 
-def Plot(data, title, URL):
+def Plot(data, title, URL, I):
     fig, axs = plt.subplots(1)
     fig.suptitle(title)
     normalize_level = []
@@ -71,7 +71,7 @@ def Plot(data, title, URL):
         peaks = FindPeaks(data)
         normalize_level.append(Normalize(np.array(process[1])))
         color = (random.random(), random.random(), random.random())
-        axs.plot(process, label="peak: %.2f" % peaks[i][0], color=color)
+        axs.plot(process, label="{I=%.2f} peak: %.2f" %(I[i], peaks[i][0]), color=color)
 
     axs.set_xlabel("Wavelength (nm)")
     axs.set_ylabel("Level (dB)")
@@ -85,7 +85,7 @@ def Print(file0, data, title):
     file.writelines(title)
     file.writelines("\n\nI\t\tlbd")
     for i in range(len(data[0])):
-        file.writelines("\n%.2f\t\t%.2f" % (data[0][i], data[1][i]))
+        file.writelines("\n%.2f\t\t%.2f" %(data[0][i], data[1][i]))
     file.close()
     return 1
 
@@ -99,9 +99,9 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     Directory = os.path.join(Number, Folder)
     if not os.path.exists(Directory):
         os.makedirs(Directory, mode)
-    title = str("%s Wavelength Spectrum {T=%.2f°C}" % (name, T))
-    file = str("%s/Wavelength Spectrum.txt" % Directory)
-    URL = str("%s/Wavelength Spectrum.png" % Directory)
+    title = str("%s Wavelength Spectrum {T=%.2f°C}" %(name, T))
+    file = str("%s/Wavelength Spectrum.txt" %Directory)
+    URL = str("%s/Wavelength Spectrum.png" %Directory)
 
     I = []
     for i in range(I_start, I_end + I_pas, I_pas):
@@ -125,7 +125,7 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
         curve.append(OSA.Conversion(OSA.Query(osa, "DMA?")))
 
     Print(file, [I, lbd], title)
-    Plot([X, curve], title, URL)
+    Plot([X, curve], title, URL, I)
 
     PRO8000.Close(pro8000)
     OSA.Close(osa)
