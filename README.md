@@ -2,12 +2,12 @@
 
 ## *Lumbird* project from **Tanguy Boulard** as engineer intern to improve the characterization bench in the active clean room.
 
-  - [Equipement](#Equipement)
+  - [Equipment](#Equipment)
   - [Installation](#installation)
   - [Credits](#credits)
   - [Roadmap](#roadmap)
 
-## Equipement
+## Equipment
 
 1. COS (Chip On Submont) electrical connectivity
 	- Four-terminal sensing: in order to measure Intensity injected on the chip plus the output Voltage
