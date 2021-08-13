@@ -10,7 +10,7 @@
 		<Property Name="server.vi.callsEnabled" Type="Bool">true</Property>
 		<Property Name="server.vi.propertiesEnabled" Type="Bool">true</Property>
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
-		<Item Name="main.vi" Type="VI" URL="../main.vi"/>
+		<Item Name="main.vi" Type="VI" URL="../HEXAPOD/main.vi"/>
 		<Item Name="Dépendances" Type="Dependencies">
 			<Item Name="Newport.XPS.CommandInterface" Type="Document" URL="Newport.XPS.CommandInterface">
 				<Property Name="NI.PreserveRelativePath" Type="Bool">true</Property>
