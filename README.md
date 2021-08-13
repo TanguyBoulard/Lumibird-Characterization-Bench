@@ -1,3 +1,8 @@
+# LUMIBIRD OPHELLIA
+
+  - [Characterization-Bench](#characterization-bench)
+  - [HEXAPOD](#hexapod)
+
 # Characterization-Bench
 
 ## *Lumbird* project from **Tanguy Boulard** as engineer intern to improve the characterization bench in the active clean room.
@@ -47,3 +52,5 @@ BOULARD Tanguy
   - [x] Create the interface which displays and saves the datas measured.
   - [ ] Automatization with Arduino.
   - [ ] Program a first version on Python.
+
+# HEXAPOD
