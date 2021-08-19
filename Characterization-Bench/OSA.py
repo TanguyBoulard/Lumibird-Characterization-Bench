@@ -70,7 +70,7 @@ def Conversion(data):
         data[i] = float(data[i])
     return data[:-1]
 
-def Initialize(I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
+def Initialize(wavelength, Span, VBW, res, Smppnt):
     rm = pyvisa.ResourceManager()
     # print(rm.list_resources())
     

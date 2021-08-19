@@ -101,12 +101,12 @@ def Initialize(T, I):
     Write(instrument, '*RST')
     Write(instrument, '*CLS')
     
-    SlotT()
+    SlotT(instrument)
     Write(instrument, ':TEMP:SET %f' %T)
     Write(instrument, ':TEC ON')
     WaitUntilSet_T(instrument, T)
 
-    SlotLD()
+    SlotLD(instrument)
     value = Offset(I)
     Write(instrument, ':ILD:SET %fE-3' %value)
     Write(instrument, ':LASER ON')

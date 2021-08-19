@@ -38,16 +38,16 @@ def Initialize(wavelength):
         print("Gentec-eo U-link not connected")
         sys.exit()
     instrument.clear()
-    instrument.query(instrument, "*ANT")
-    instrument.query(instrument, "*CFT")
-    instrument.query(instrument, "*CMX")
-    instrument.query(instrument, "*FAS")
+    Query(instrument, "*ANT")
+    Query(instrument, "*CFT")
+    Query(instrument, "*CMX")
+    Query(instrument, "*FAS")
     l = len(str(wavelength))
     if l != 4:
         for i in range(l):
             wavelength = "0" + wavelength[:]
-    instrument.query(instrument, "*PWC%s" % str(wavelength))
-    instrument.query(instrument, "*MUL10.0E+00")
+    Query(instrument, "*PWC%s" % str(wavelength))
+    Query(instrument, "*MUL10.0E+00")
     
     return instrument
     

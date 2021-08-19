@@ -112,7 +112,7 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     curve = []
     
     pro8000 = PRO8000.Initialize(T, I_start)
-    osa = OSA.Initialize(I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt)
+    osa = OSA.Initialize(wavelength, Span, VBW, res, Smppnt)
 
     for element in I:
         PRO8000.SlotLD()

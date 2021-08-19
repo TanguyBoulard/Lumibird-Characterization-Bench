@@ -239,7 +239,7 @@ class Characterization(tk.Toplevel):
             self.text_error.config(text="")
             flag = 1
         if flag == 1:
-            ARDUINO.Write(b'a\r\n') # Bolometer in
+            ARDUINO.Write(port, b'a\r\n') # Bolometer in
             time.sleep(5)
             LIV.Data(
                 str(conditions[13]),
@@ -249,9 +249,9 @@ class Characterization(tk.Toplevel):
                 float(conditions[0]),
                 str(conditions[12]),
             )
-            ARDUINO.Write(b'b\r\n') # Bolometer out
+            ARDUINO.Write(port, b'b\r\n') # Bolometer out
             time.sleep(20)
-            ARDUINO.Write(b'y\r\n') # Sphere in
+            ARDUINO.Write(port, b'y\r\n') # Sphere in
             time.sleep(5)
             WAVELENGTH_SPECTRUM.Data(
                 str(conditions[13]),
@@ -265,7 +265,7 @@ class Characterization(tk.Toplevel):
                 float(conditions[10]),
                 int(conditions[11]),
             )
-            ARDUINO.Write(b'z\r\n') # Sphere out
+            ARDUINO.Write(port, b'z\r\n') # Sphere out
             time.sleep(5)
             self.button_start.config(text="FIN", command=self.destroy)
             self.text_error.config(text="")
@@ -363,10 +363,10 @@ class BurnIn(tk.Toplevel):
             flag = 1
         if flag == 1:
             print(conditions)
-            ARDUINO.Write(b'a\r\n') # Bolometer in
+            ARDUINO.Write(port, b'a\r\n') # Bolometer in
             time.sleep(5)
             BURN_IN.main(conditions[1], conditions[0], conditions[2], conditions[3], conditions[4])
-            ARDUINO.Write(b'b\r\n') # Bolometer out
+            ARDUINO.Write(port, b'b\r\n') # Bolometer out
             time.sleep(5)
             self.button_start.config(text="FIN", command=self.destroy)
             self.text_error.config(text='')

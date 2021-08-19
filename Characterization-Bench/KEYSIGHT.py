@@ -40,17 +40,17 @@ def Initialize():
     rm = pyvisa.ResourceManager()
     # print(rm.list_resources())
     
-    instrument = rm.open_resource("USB0::0x2A8D::0xB318::MY58260020::INSTR")
+    instrument = rm.open_resource("USB0::0x2A8D::0xB318::MY58020033::INSTR")
     instrument.read_termination = "\n"
-    instrument.write_termination = "\r\n"
+    instrument.write_termination = ""
     instrument.baud_rate = 9600
-    if (Query(instrument, "*IDN?")!= "Keysight Technologies,34450A,MY58260020,01.02-01.00"):
+    if (Query(instrument, "*IDN?")!= "Keysight Technologies,34450A,MY58020033,01.02-01.00"):
         print("KEYSIGHT 34450A not connected")
         sys.exit()
     instrument.clear()
-    instrument.write(instrument, "*RST")
-    instrument.write(instrument, "*CLS")
-    instrument.write(instrument, ":CONF:VOLT:DC")
+    Write(instrument, "*RST")
+    Write(instrument, "*CLS")
+    Write(instrument, ":CONF:VOLT:DC")
     
     return instrument
     
