@@ -17,12 +17,11 @@ import sys
 # =============================================================================
 
 def Read(instrument):
-    return float(Query("MEAS:PRIM:VOLT:DC?"))
+    return float(Query(instrument, "MEAS:PRIM:VOLT:DC?"))
 
 def Write(instrument, command):
     instrument.write(command)
     Error(instrument)
-    return 1
 
 def Query(instrument, command):
     value = instrument.query(command)
@@ -34,7 +33,6 @@ def Error(instrument):
     if int(err[1]) != 0:
         print(err, end="\n\r")
         sys.exit()
-    return 1
 
 def Initialize():
     rm = pyvisa.ResourceManager()
@@ -48,6 +46,7 @@ def Initialize():
         print("KEYSIGHT 34450A not connected")
         sys.exit()
     instrument.clear()
+    instrument.query(":SYST:ERR?")
     Write(instrument, "*RST")
     Write(instrument, "*CLS")
     Write(instrument, ":CONF:VOLT:DC")
@@ -55,6 +54,5 @@ def Initialize():
     return instrument
     
 def Close(instrument):
-    Write("*RST")
+    pyvisa.ResourceManager().open_resource("USB0::0x2A8D::0xB318::MY58020033::INSTR").write("RST")
     instrument.close()
-    return 1

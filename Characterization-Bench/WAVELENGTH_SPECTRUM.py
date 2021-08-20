@@ -59,8 +59,11 @@ def FindPeaks(data):
 def SignalProcessing(X, Y, nb):
     peakind = argrelextrema(Y, np.greater)
     df = (pd.DataFrame([Y[i] for i in peakind][0], [X[i] for i in peakind][0]).rolling(nb).max())
-    return df.to_numpy()
-    return 1
+    arr = df.to_numpy()
+    liste = []
+    for element in arr :
+        liste.append(element[0])
+    return liste[2:]
 
 def Plot(data, title, URL, I):
     fig, axs = plt.subplots(1)
@@ -69,16 +72,15 @@ def Plot(data, title, URL, I):
     for i in range(len(data[1])):
         process = SignalProcessing(np.array(data[0]), np.array(data[1][i]), 3)
         peaks = FindPeaks(data)
-        normalize_level.append(Normalize(np.array(process[1])))
+        normalize_level.append(Normalize(np.array(process)))
         color = (random.random(), random.random(), random.random())
-        axs.plot(process, label="{I=%.2f} peak: %.2f" %(I[i], peaks[i][0]), color=color)
+        axs.plot(normalize_level[i], label="{I=%.2f} peak: %.2f" %(I[i], peaks[i][0]), color=color)
 
     axs.set_xlabel("Wavelength (nm)")
     axs.set_ylabel("Level (dB)")
     axs.legend()
     plt.show()
     plt.savefig(URL, dpi=150)
-    return 1
 
 def Print(file0, data, title):
     file = open(file0, "w")
@@ -87,7 +89,6 @@ def Print(file0, data, title):
     for i in range(len(data[0])):
         file.writelines("\n%.2f\t\t%.2f" %(data[0][i], data[1][i]))
     file.close()
-    return 1
 
 def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     
@@ -112,10 +113,10 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     curve = []
     
     pro8000 = PRO8000.Initialize(T, I_start)
-    osa = OSA.Initialize(wavelength, Span, VBW, res, Smppnt)
+    osa = OSA.Initialize(wavelength, Span, VBW, float(res), Smppnt)
 
     for element in I:
-        PRO8000.SlotLD()
+        PRO8000.SlotLD(pro8000)
         value = PRO8000.Offset(element)
         PRO8000.Write(pro8000, ":ILD:SET %fE-3" %value)
         PRO8000.WaitUntilSet_I(pro8000, element)
@@ -129,7 +130,6 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
 
     PRO8000.Close(pro8000)
     OSA.Close(osa)
-    return 1
 
 def Stop():
     rm = pyvisa.ResourceManager()
@@ -141,4 +141,3 @@ def Stop():
     OSA.Close(osa)
 
     sys.exit()
-    return 1

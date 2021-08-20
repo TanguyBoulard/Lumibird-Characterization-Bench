@@ -25,9 +25,8 @@ def OpenPort():
 
 def Write(port, command):
     port.write(command)
-    for _ in range(len(command)):
-        port.read() # Read the loopback chars and ignore
-    return 1
+    # for _ in range(len(command)):
+    #     port.read() # Read the loopback chars and ignore
 
 def Read(port):
     while True:

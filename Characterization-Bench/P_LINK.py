@@ -42,16 +42,17 @@ def Initialize(wavelength):
     Query(instrument, "*CFT")
     Query(instrument, "*CMX")
     Query(instrument, "*FAS")
-    l = len(str(wavelength))
+    w = str(wavelength)
+    l = len(w)
     if l != 4:
         for i in range(l):
-            wavelength = "0" + wavelength[:]
-    Query(instrument, "*PWC%s" % str(wavelength))
+            w = '0' + w[:]
+    Query(instrument, "*PWC%s" % str(w))
     Query(instrument, "*MUL10.0E+00")
     
     return instrument
     
 def Close(instrument):
-    Query(instrument, "*RST")
+    pyvisa.ResourceManager().open_resource("ASRL5::INSTR").clear()
     instrument.close()
     return 1

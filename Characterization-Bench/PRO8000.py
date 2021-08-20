@@ -30,7 +30,6 @@ PRO8000_offset = 5.0  # mA
 def Write(instrument, command):
     instrument.write(command)
     Error(instrument)
-    return 1
 
 def Query(instrument, command):
     value = instrument.query(command)
@@ -48,32 +47,27 @@ def Offset(I):
 
 def SlotLD(instrument):
     Write(instrument, slot_LD)
-    return 1
 
 def SlotT(instrument):
     Write(instrument, slot_T)
-    return 1
 
 def WaitUntilSet_T(instrument, T):
     for i in range(50000):
         if ((T-T*(5/100)) <= (float(Query(instrument, ':TEMP:ACT?')[10:])) <= (T+T*(5/100))):
             break
         time.sleep(1)
-    return 1
 
 def WaitUntilSet_I(instrument, I):
     for i in range(50000):
         if ((I-I*(5/100)) <= ((float(Query(instrument, ':ILD:ACT?')[9:]))*1e3) <= (I+I*(5/100))):
             break
         time.sleep(1)
-    return 1
 
 def Error(instrument):
     err = instrument.query(":SYST:ERR?")
     if int(err[0]) == "0":
         print(err, end="\n\r")
         sys.exit()
-    return 1
 
 def Timer(t):
     while t:
@@ -83,7 +77,6 @@ def Timer(t):
         time.sleep(1)
         t -= 1
     print("FIN")
-    return 1
 
 def Initialize(T, I):
     rm = pyvisa.ResourceManager()
@@ -115,12 +108,11 @@ def Initialize(T, I):
     return instrument
 
 def Close(instrument):
-    SlotT()
-    instrument.write(instrument, ":TEC OFF")
+    SlotT(instrument)
+    pyvisa.ResourceManager().open_resource('ASRL8::INSTR').write(':TEC OFF')
 
-    SlotLD()
-    instrument.write(instrument, ":LASER OFF")
+    SlotLD(instrument)
+    pyvisa.ResourceManager().open_resource('ASRL8::INSTR').write(':LASER OFF')
 
-    instrument.write(instrument, "*RST")
+    pyvisa.ResourceManager().open_resource('ASRL8::INSTR').write('*RST')
     instrument.close()
-    return 1

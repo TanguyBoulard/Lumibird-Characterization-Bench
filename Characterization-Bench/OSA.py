@@ -37,7 +37,7 @@ def Error(instrument):
     err = instrument.query("ERR?")
     if err != "000\r\n":
         print(err, end="\n\r")
-        sys.exit()
+        # sys.exit()
     return 1
 
 def WaitUntilEvent_SSI(instrument):
@@ -101,8 +101,7 @@ def Initialize(wavelength, Span, VBW, res, Smppnt):
     return instrument
     
 def Close(instrument):
-    instrument.write(instrument, "EMK")
-    instrument.write(instrument, "GCL")
-    instrument.write(instrument, "ZMK ERS")
+    pyvisa.ResourceManager().open_resource('GPIB0::8::INSTR').write("EMK")
+    pyvisa.ResourceManager().open_resource('GPIB0::8::INSTR').write("GCL")
+    pyvisa.ResourceManager().open_resource('GPIB0::8::INSTR').write("ZMK ERS")
     instrument.close()
-    return 1

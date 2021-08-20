@@ -55,7 +55,7 @@ def Data(name, I_start, I_end, I_pas, T, wavelength):
     Directory = os.path.join(Name, Folder)
     if not os.path.exists(Directory):
         os.makedirs(Directory, mode)
-    title = str("%s Light-Current-Voltage Characteristics {T=%.2f°C}" % (name, T))
+    title = str("Light-Current-Voltage Characteristics {T=%.2f°C}" % (T))
     file = str("%s/Light-Current-Voltage Characteristics.txt" % Directory)
     URL = str("%s/Light-Current-Voltage Characteristics.png" % Directory)
     
@@ -68,11 +68,12 @@ def Data(name, I_start, I_end, I_pas, T, wavelength):
     bolometer = P_LINK.Initialize(wavelength)
     
     offset = P_LINK.Read(bolometer)
+    print(offset)
 
     for element in I:
-        PRO8000.SlotLD()
+        PRO8000.SlotLD(pro8000)
         value = PRO8000.Offset(element)
-        PRO8000.Write(":ILD:SET %fE-3" %value)
+        PRO8000.Write(pro8000, ":ILD:SET %fE-3" %value)
         PRO8000.WaitUntilSet_I(pro8000, element)
         U.append(KEYSIGHT.Read(multimeter))
         P_opt.append(P_LINK.Read(bolometer) * 1E3)  # VALUE

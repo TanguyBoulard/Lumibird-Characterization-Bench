@@ -26,7 +26,7 @@ import time
 
 ended = False
 
-port = ARDUINO.OpenPort()
+port = ARDUINO.OpenPort()  
 
 # =============================================================================
 # CLASS
@@ -98,6 +98,57 @@ class Characterization(tk.Toplevel):
         input_step.grid(row=2, column=1, sticky="nesw")
         text_step_unit = tk.Label(self.lf_Intensity, text="mA")
         text_step_unit.grid(row=2, column=2, sticky="w")
+
+        # Separator
+        separator = tk.Label(self, text="Spectre en longueur d'onde")
+        separator.grid(row=3, columnspan=10, sticky="ew")
+
+        # OSA
+        self.lf_OSA = tk.LabelFrame(self, text="OSA")
+        self.lf_OSA.grid(row=5, rowspan=1, columnspan=2, sticky="nesw")
+
+            # Span
+        text_span = tk.Label(self.lf_OSA, text="Plage de mesure :")
+        text_span.grid(row=0, column=0, sticky="e")
+        input_span = tk.Entry(self.lf_OSA, textvariable="")
+        self.command.append(input_span)
+        input_span.grid(row=0, column=1, sticky="nesw")
+        text_span_unit = tk.Label(self.lf_OSA, text="nm\t")
+        text_span_unit.grid(row=0, column=2, sticky="w")
+
+            # VBW
+        VBW_option_list = [int(1E1), int(1E2), int(1E3), int(1E4), int(1E5), int(1E6)]
+        text_VBW = tk.Label(self.lf_OSA, text="Fréquence d'échantillonnage :")
+        text_VBW.grid(row=0, column=3, sticky="e")
+        input_VBW = tk.StringVar(self.lf_OSA)
+        input_VBW.set(VBW_option_list[2])
+        self.command.append(input_VBW)
+        opt_VBW = tk.OptionMenu(self.lf_OSA, input_VBW, *VBW_option_list)
+        opt_VBW.grid(row=0, column=4, sticky="nesw")
+        text_VBW_unit = tk.Label(self.lf_OSA, text="Hz")
+        text_VBW_unit.grid(row=0, column=5, sticky="w")
+
+            # Resolution
+        Resolution_option_list = [1,0.5,0.2,0.1,0.07]
+        text_Resolution = tk.Label(self.lf_OSA, text="Résolution :")
+        text_Resolution.grid(row=1, column=0, sticky="e")
+        input_Resolution = tk.StringVar(self.lf_OSA)
+        input_Resolution.set(Resolution_option_list[-1])
+        self.command.append(input_Resolution)
+        opt_Resolution = tk.OptionMenu(self.lf_OSA, input_Resolution, *Resolution_option_list)
+        opt_Resolution.grid(row=1, column=1, sticky="nesw")
+        text_Resolution_unit = tk.Label(self.lf_OSA, text="nm")
+        text_Resolution_unit.grid(row=1, column=2, sticky="w")
+
+            # Sampling Points
+        Smppnt_option_list = [51,101,251,501,1001,2001,5001]
+        text_Smppnt = tk.Label(self.lf_OSA, text="Nombre de points :")
+        text_Smppnt.grid(row=1, column=3, sticky="e")
+        input_Smppnt = tk.StringVar(self.lf_OSA)
+        input_Smppnt.set(Smppnt_option_list[-2])
+        self.command.append(input_Smppnt)
+        opt_Smppnt = tk.OptionMenu(self.lf_OSA, input_Smppnt, *Smppnt_option_list)
+        opt_Smppnt.grid(row=1, column=4, sticky="nesw")
         
         # Intensity OSA
         self.lf_IntensityOSA = tk.LabelFrame(self, text="Intensité")
@@ -142,53 +193,6 @@ class Characterization(tk.Toplevel):
         input_temperatureOSA.grid(row=0, column=1, sticky="nesw")
         text_temperatureOSA_unit = tk.Label(self.lf_TemperatureOSA, text="°C")
         text_temperatureOSA_unit.grid(row=0, column=2, sticky="w")
-
-        # OSA
-        self.lf_OSA = tk.LabelFrame(self, text="OSA")
-        self.lf_OSA.grid(row=5, rowspan=1, columnspan=2, sticky="nesw")
-
-            # Span
-        text_span = tk.Label(self.lf_OSA, text="Plage de mesure :")
-        text_span.grid(row=0, column=0, sticky="e")
-        input_span = tk.Entry(self.lf_OSA, textvariable="")
-        self.command.append(input_span)
-        input_span.grid(row=0, column=1, sticky="nesw")
-        text_span_unit = tk.Label(self.lf_OSA, text="nm\t")
-        text_span_unit.grid(row=0, column=2, sticky="w")
-
-            # VBW
-        VBW_option_list = [1E1, 1E2, 1E3, 1E4, 1E5, 1E6]
-        text_VBW = tk.Label(self.lf_OSA, text="Fréquence d'échantillonnage :")
-        text_VBW.grid(row=0, column=3, sticky="e")
-        input_VBW = tk.StringVar(self.lf_OSA)
-        input_VBW.set(VBW_option_list[2])
-        self.command.append(input_VBW)
-        opt_VBW = tk.OptionMenu(self.lf_OSA, input_VBW, *VBW_option_list)
-        opt_VBW.grid(row=0, column=4, sticky="nesw")
-        text_VBW_unit = tk.Label(self.lf_OSA, text="Hz")
-        text_VBW_unit.grid(row=0, column=5, sticky="w")
-
-            # Resolution
-        Resolution_option_list = [1,0.5,0.2,0.1,0.07]
-        text_Resolution = tk.Label(self.lf_OSA, text="Résolution :")
-        text_Resolution.grid(row=1, column=0, sticky="e")
-        input_Resolution = tk.StringVar(self.lf_OSA)
-        input_Resolution.set(Resolution_option_list[-1])
-        self.command.append(input_Resolution)
-        opt_Resolution = tk.OptionMenu(self.lf_OSA, input_Resolution, *Resolution_option_list)
-        opt_Resolution.grid(row=1, column=1, sticky="nesw")
-        text_Resolution_unit = tk.Label(self.lf_OSA, text="nm")
-        text_Resolution_unit.grid(row=1, column=2, sticky="w")
-
-            # Sampling Points
-        Smppnt_option_list = [51,101,251,501,1001,2001,5001]
-        text_Smppnt = tk.Label(self.lf_OSA, text="Nombre de points :")
-        text_Smppnt.grid(row=1, column=3, sticky="e")
-        input_Smppnt = tk.StringVar(self.lf_OSA)
-        input_Smppnt.set(Smppnt_option_list[-2])
-        self.command.append(input_Smppnt)
-        opt_Smppnt = tk.OptionMenu(self.lf_OSA, input_Smppnt, *Smppnt_option_list)
-        opt_Smppnt.grid(row=1, column=4, sticky="nesw")
         
         # General
         self.lf_general = tk.LabelFrame(self, text="Général")
@@ -235,38 +239,23 @@ class Characterization(tk.Toplevel):
             self.text_error.config(text="Merci de remplir toutes les cases")
             flag = 0
         else:
-            self.button_start.config(text="EN COURS", command=self.destroy)
+            self.button_start.config(text="CRASH", command=self.destroy)
             self.text_error.config(text="")
             flag = 1
         if flag == 1:
             ARDUINO.Write(port, b'a\r\n') # Bolometer in
             time.sleep(5)
-            LIV.Data(
-                str(conditions[13]),
-                int(conditions[1]),
-                int(conditions[2]),
-                int(conditions[3]),
-                float(conditions[0]),
-                str(conditions[12]),
-            )
+            LIV.Data(str(conditions[13]), int(conditions[1]), int(conditions[2]), int(conditions[3]), float(conditions[0]), str(conditions[12]))
+            time.sleep(5)
             ARDUINO.Write(port, b'b\r\n') # Bolometer out
-            time.sleep(20)
-            ARDUINO.Write(port, b'y\r\n') # Sphere in
             time.sleep(5)
-            WAVELENGTH_SPECTRUM.Data(
-                str(conditions[13]),
-                int(conditions[4]),
-                int(conditions[5]),
-                int(conditions[6]),
-                float(conditions[7]),
-                float(conditions[12]),
-                float(conditions[8]),
-                float(conditions[9]),
-                float(conditions[10]),
-                int(conditions[11]),
-            )
-            ARDUINO.Write(port, b'z\r\n') # Sphere out
+            ARDUINO.Write(port, b'z\r\n') # Sphere in
             time.sleep(5)
+            WAVELENGTH_SPECTRUM.Data(str(conditions[13]), int(conditions[8]), int(conditions[9]), int(conditions[10]), float(conditions[11]), float(conditions[12]), float(conditions[4]), int(conditions[5]), float(conditions[6]), int(conditions[7]))
+            time.sleep(5)
+            ARDUINO.Write(port, b'y\r\n') # Sphere out
+            time.sleep(5)
+            ARDUINO.Write(port, b's\r\n')
             self.button_start.config(text="FIN", command=self.destroy)
             self.text_error.config(text="")
 
@@ -362,12 +351,13 @@ class BurnIn(tk.Toplevel):
             self.text_error.config(text='')
             flag = 1
         if flag == 1:
-            print(conditions)
             ARDUINO.Write(port, b'a\r\n') # Bolometer in
             time.sleep(5)
             BURN_IN.main(conditions[1], conditions[0], conditions[2], conditions[3], conditions[4])
+            time.sleep(5)
             ARDUINO.Write(port, b'b\r\n') # Bolometer out
             time.sleep(5)
+            ARDUINO.Write(port, b's\r\n')
             self.button_start.config(text="FIN", command=self.destroy)
             self.text_error.config(text='')
 
@@ -390,7 +380,6 @@ class Main(tk.Tk):
         # window = TIMER.Timer
         window = BurnIn(self)
         window.grab_set()
-
 
 app = Main()
 app.mainloop()
