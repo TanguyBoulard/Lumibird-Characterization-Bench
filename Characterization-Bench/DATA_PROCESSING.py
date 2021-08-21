@@ -5,7 +5,7 @@
 name = ''
 nb = 1
 
-lbd = 1548e-9 #wavelength in m
+lbd = 973e-9 #wavelength in m
 I = 150 #intensity in mA
 T = 25 #temperature in °C
 
@@ -23,7 +23,7 @@ aff_err = 0
     #modelisation
         #0: Gaussian
         #1: Petermann II
-modelisation = 0
+modelisation = 1
 
     #mode:
         #0: Wavelength Spectrum
@@ -629,12 +629,15 @@ def f1(a, x):
     #I(theta)*sin^3(theta)*cos(theta)
     return a*((np.sin(x))**3)*np.cos(x)
 
-def Gaussian(data, lbd):
+def Gaussian(data, lbd, axis):
     theta_FF = FWHM(GaussFunction(np.array(data[0], dtype=float), *FitGaussian(np.array(data[0], dtype=float), np.array(data[1], dtype=float))[0]))[1][0][0]
     omega_0_gauss = lbd/(np.pi*(theta_FF*(np.pi/180)))
-    return omega_0_gauss
+    if axis==0:
+        return omega_0_gauss
+    else:
+        return 10*omega_0_gauss
 
-def Petermann(data, lbd):
+def Petermann(data, lbd, axis):
     theta_r = []
     for theta_d in data[0]:
         theta_r.append(theta_d*(np.pi/180)) #degree into radian conversion coef
@@ -646,18 +649,21 @@ def Petermann(data, lbd):
     I1 = sum(integrate.cumtrapz(y1, theta_r))
 
     petermann = (lbd/np.pi)*np.sqrt((2*I0)/I1)
-    return petermann
+    if axis==0:
+        return petermann
+    else:
+        return 10*petermann
 
 def BeamRadius(MFD, z, lbd):
     z_R = (np.pi/lbd)*(MFD/2)**2 #Rayleigh range
     omega = (MFD/2)*np.sqrt(1+((z/z_R)**2)) #Beam radius at distance z
     return omega
 
-def IntensityR(data, lbd, list_r, modelisation):
+def IntensityR(data, lbd, list_r, modelisation, axis):
     if modelisation == 0:
-        MFD = Gaussian(data, lbd)
+        MFD = Gaussian(data, lbd, axis)
     if modelisation == 1:
-        MFD = Petermann(data, lbd)
+        MFD = Petermann(data, lbd, axis)
     omega = 0.5*BeamRadius(MFD, 0, lbd)
     I = []
         #[r] = µm
@@ -732,7 +738,7 @@ def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
 
             #theory Fast Axis
         x0_theory = np.array(dataNF[6][i_nf][nf_fa], dtype=float)
-        y0_theory = np.array(IntensityR(dataFF[i_ff+ff_fa], lbd, dataNF[6][i_nf][nf_fa], modelisation), dtype=float)
+        y0_theory = np.array(IntensityR(dataFF[i_ff+ff_fa], lbd, dataNF[6][i_nf][nf_fa], modelisation, 0), dtype=float)
         y0_theory_normalize = Normalize(y0_theory)
         axs[0].plot(x0_theory, y0_theory_normalize, linestyle = '-.', color=color_0)
         # axs[0].text(2.0, 0.0, '1/e^2 theory: %.2f µm' %(resultat_FA_theory), backgroundcolor='k', color='w')
@@ -758,7 +764,7 @@ def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
 
             #theory Slow Axis
         x1_theory = np.array(dataNF[6][i_nf][nf_sa], dtype=float)
-        y1_theory = np.array(IntensityR(dataFF[i_ff+ff_sa], lbd, dataNF[6][i_nf][nf_sa], modelisation), dtype=float)
+        y1_theory = np.array(IntensityR(dataFF[i_ff+ff_sa], lbd, dataNF[6][i_nf][nf_sa], modelisation, 1), dtype=float)
         y1_theory_normalize = Normalize(y1_theory)
         axs[1].plot(x1_theory, y1_theory_normalize, linestyle = '-.', color=color_1)
         # axs[1].text(2.0, 0.0, '1/e^2 theory: %.2f µm' %(resultat_SA_theory), backgroundcolor='k', color='w')
@@ -956,10 +962,10 @@ def PrintNFtoFF(file, dataFF, dataNF, title, nf_fa, nf_sa, ff_fa, ff_sa, nb):
 
     file.close()
 
-nf_fa = 0 #THIS VALUE MIGHT CHANGE
-nf_sa = 1-nf_fa
+nf_fa = 1 #THIS VALUE MIGHT CHANGE
+nf_sa = 0
 ff_fa = 1 #THIS VALUE MIGHT CHANGE
-ff_sa = 1-ff_fa
+ff_sa = 0
 
 ###
 if mode==4:
