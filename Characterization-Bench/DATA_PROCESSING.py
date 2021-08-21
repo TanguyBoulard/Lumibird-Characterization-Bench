@@ -632,6 +632,7 @@ def f1(a, x):
 def Gaussian(data, lbd, axis):
     theta_FF = FWHM(GaussFunction(np.array(data[0], dtype=float), *FitGaussian(np.array(data[0], dtype=float), np.array(data[1], dtype=float))[0]))[1][0][0]
     omega_0_gauss = lbd/(np.pi*(theta_FF*(np.pi/180)))
+    print(omega_0_gauss)
     if axis==0:
         return omega_0_gauss
     else:
@@ -648,11 +649,13 @@ def Petermann(data, lbd, axis):
     y1 = f1(data[1], theta_r)
     I1 = sum(integrate.cumtrapz(y1, theta_r))
 
-    petermann = (lbd/np.pi)*np.sqrt((2*I0)/I1)
+    petermann = (lbd/2*np.pi)*np.sqrt((2*I0)/I1)
     if axis==0:
-        return petermann
+        print((1/4)*petermann)
+        return (1/2)*petermann
     else:
-        return 10*petermann
+        print((1/4)*petermann)
+        return (1/2)*petermann
 
 def BeamRadius(MFD, z, lbd):
     z_R = (np.pi/lbd)*(MFD/2)**2 #Rayleigh range
@@ -911,8 +914,8 @@ def PrintFFtoNF(file, dataFF, dataNF, title, nf_fa, nf_sa, ff_fa, ff_sa, nb):
 
         resultat_FA = dataNF[9][i_nf][nf_fa]
         resultat_SA = dataNF[9][i_nf][nf_sa]
-        resultat_FA_theory = Petermann(dataFF[i_ff+ff_fa], lbd)*1e6
-        resultat_SA_theory = Petermann(dataFF[i_ff+ff_sa], lbd)*1e6
+        resultat_FA_theory = Petermann(dataFF[i_ff+ff_fa], lbd, 0)*1e6
+        resultat_SA_theory = Petermann(dataFF[i_ff+ff_sa], lbd, 1)*1e6
         err_FA = abs(resultat_FA-resultat_FA_theory)/resultat_FA_theory
         err_SA = abs(resultat_SA-resultat_SA_theory)/resultat_SA_theory
         file.writelines('\n\nFast Axis 1/e^2: %.2fµm' %(resultat_FA))
@@ -962,8 +965,8 @@ def PrintNFtoFF(file, dataFF, dataNF, title, nf_fa, nf_sa, ff_fa, ff_sa, nb):
 
     file.close()
 
-nf_fa = 1 #THIS VALUE MIGHT CHANGE
-nf_sa = 0
+nf_fa = 0 #THIS VALUE MIGHT CHANGE
+nf_sa = 1
 ff_fa = 1 #THIS VALUE MIGHT CHANGE
 ff_sa = 0
 
