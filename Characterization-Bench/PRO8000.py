@@ -69,15 +69,6 @@ def Error(instrument):
         print(err, end="\n\r")
         sys.exit()
 
-def Timer(t):
-    while t:
-        mins, secs = divmod(t, 60)
-        timer = "{:02d}:{:02d}".format(mins, secs)
-        print(timer, end="\n\r")
-        time.sleep(1)
-        t -= 1
-    print("FIN")
-
 def Initialize(T, I):
     rm = pyvisa.ResourceManager()
     # print(rm.list_resources())

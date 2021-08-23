@@ -68,7 +68,7 @@ def Data(name, I_start, I_end, I_pas, T, wavelength):
     bolometer = P_LINK.Initialize(wavelength)
     
     offset = P_LINK.Read(bolometer)
-    print(offset)
+    print('offset bolometre = %fmW' %offset)
 
     for element in I:
         PRO8000.SlotLD(pro8000)

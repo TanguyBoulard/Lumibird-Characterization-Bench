@@ -32,7 +32,7 @@ def Error(instrument):
     err = instrument.query(":SYST:ERR?")
     if int(err[1]) != 0:
         print(err, end="\n\r")
-        sys.exit()
+        # sys.exit()
 
 def Initialize():
     rm = pyvisa.ResourceManager()
@@ -54,5 +54,5 @@ def Initialize():
     return instrument
     
 def Close(instrument):
-    pyvisa.ResourceManager().open_resource("USB0::0x2A8D::0xB318::MY58020033::INSTR").write("RST")
+    pyvisa.ResourceManager().open_resource("USB0::0x2A8D::0xB318::MY58020033::INSTR").clear()
     instrument.close()

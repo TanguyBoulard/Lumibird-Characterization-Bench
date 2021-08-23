@@ -94,7 +94,7 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     
     desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
     os.chdir(desktop)
-    Number = str('%s' %name)
+    Number = str('%s/' %name)
     Folder = str("\Wavelength Spectrum")
     mode = 0o666
     Directory = os.path.join(Number, Folder)
