@@ -1,18 +1,11 @@
 # =============================================================================
-# CREDITS
-# =============================================================================
-# Author : Tanguy BOULARD
-# Date   : 28/06/2021
-# Script : Data processing
-
-# =============================================================================
 # EXPERIMENTAL CONDITIONS
 # =============================================================================
 
 name = ''
-nb = 3
+nb = 1
 
-lbd = 1548e-9 #wavelength in m
+lbd = 973e-9 #wavelength in m
 I = 150 #intensity in mA
 T = 25 #temperature in °C
 
@@ -27,6 +20,11 @@ nf_y_err = 20e-2 #uncertainty(nm)
         #1: True
 aff_err = 0
 
+    #modelisation
+        #0: Gaussian
+        #1: Petermann II
+modelisation = 1
+
     #mode:
         #0: Wavelength Spectrum
         #1: Light-Current-Voltage Characteristics
@@ -34,7 +32,7 @@ aff_err = 0
         #3: Near Field
         #4: from Far Field to Near Field
         #5: from Near Field to Far Field
-mode = 5
+mode = 4
 
 # =============================================================================
 # MODULES
@@ -312,9 +310,6 @@ def PlotFF(data, title, name, err, nb):
     # resultat_FA = FWHM(GaussFunction(np.array(data[i][0], dtype=float), *FitGaussian(np.array(data[i][0], dtype=float)[0], np.array(data[i][1], dtype=float))))[1][0][0]
     # resultat_SA = FWHM(GaussFunction(np.array(data[i+1][0], dtype=float), *FitGaussian(np.array(data[i+1][0], dtype=float)[0], np.array(data[i+1][1], dtype=float))))[1][0][0]
 
-    fig, axs = plt.subplots(2, 1, figsize=(20, 20))
-    fig.suptitle(title)
-
     x0_min = np.array(data[0][0],dtype=float).min()
     x0_max = np.array(data[0][0],dtype=float).max()
     x1_min = np.array(data[1][0],dtype=float).min()
@@ -326,7 +321,12 @@ def PlotFF(data, title, name, err, nb):
 
     for i in range(0, 2*nb, 2):
 
-        color_0 = (random.random(), random.random(), random.random())
+        if nb > 1:
+            color_0 = (random.random(), random.random(), random.random())
+            color_1 = color_0
+        else:
+            color_0 = 'blue'
+            color_1 = 'red'
 
             #Fast Axis
         x0 = np.array(data[i][0],dtype=float)
@@ -337,17 +337,17 @@ def PlotFF(data, title, name, err, nb):
         y0_normalize = Normalize(y0)
         if (y0_normalize.min() < y0_min): y0_min = y0_normalize.min()
         if (y0_normalize.max() > y0_max): y0_max = y0_normalize.max()
-        axs[0].plot(x0_centre, y0_normalize, linestyle = ':', color=color_0)
+        plt.plot(x0_centre, y0_normalize, linestyle = ':', color=color_0, label='Fast Axis')
         if err[0]:
-            axs[0].errorbar(x0_centre, y0_normalize, err[1], err[2])
+            plt.errorbar(x0_centre, y0_normalize, err[1], err[2])
 
             #fitted Fast Axis
         x0_fit = np.array(data[i][0],dtype=float)
         y0_fit = GaussFunction(x0_fit, *FitGaussian(x0_fit, data[i][1])[0])
         x0_centre_fit = Centre(x0_fit, np.where(y0_fit == y0_fit.max())[0])
         y0_fit_normalize = Normalize(y0_fit)
-        axs[0].plot(x0_centre_fit, y0_fit_normalize, linestyle = '-', color=color_0)
-        # axs[0].text(0, 0.05, 'Fast Axis FWHM: %.2f' %(resultat_FA), backgroundcolor='k', color='w')
+        plt.plot(x0_centre_fit, y0_fit_normalize, linestyle = '-', color=color_0)
+        # plt.text(0, 0.05, 'Fast Axis FWHM: %.2f' %(resultat_FA), backgroundcolor='k', color='w')
 
             #Slow Axis
         x1 = np.array(data[i+1][0],dtype=float)
@@ -358,29 +358,24 @@ def PlotFF(data, title, name, err, nb):
         y1_normalize = Normalize(y1)
         if (y1_normalize.min() < y1_min): y1_min = y1_normalize.min()
         if (y1_normalize.max() > y1_max): y1_max = y1_normalize.max()
-        axs[1].plot(x1, y1_normalize, linestyle = ':', color=color_0)
+        plt.plot(x1, y1_normalize, linestyle = ':', color=color_1, label='Slow Axis')
         if err[0]:
-            axs[1].errorbar(x1_centre, y1_normalize, err[1], err[2])
+            plt.errorbar(x1_centre, y1_normalize, err[1], err[2])
 
             #fitted Slow Axis
         x1_fit = np.array(data[i+1][0],dtype=float)
         y1_fit = GaussFunction(x1_fit, *FitGaussian(x1_fit, data[i+1][1])[0])
         x1_centre_fit = Centre(x1_fit, np.where(y1_fit == y1_fit.max())[0])
         y1_fit_normalize = Normalize(y1_fit)
-        axs[1].plot(x1_centre_fit, y1_fit_normalize, linestyle = '-', color=color_0)
-        # axs[1].text(0, 0, 'Slow Axis FWHM: %.2f'%(resultat_SA), backgroundcolor='k', color='w')
+        plt.plot(x1_centre_fit, y1_fit_normalize, linestyle = '-', color=color_1)
+        # plt.text(0, 0, 'Slow Axis FWHM: %.2f'%(resultat_SA), backgroundcolor='k', color='w')
 
-    axs[0].set_title('Fast Axis : x axis')
-    axs[0].legend(title=': data\n- fit')
-    axs[0].set_xlim([min(x0_min, x1_min), max(x0_max, x1_max)])
-    axs[0].set_ylim([min(y0_min, y1_min), max(y0_max, y1_max)])
-    axs[1].set_title('Slow Axis : y axis')
-    axs[1].legend(title=': data\n- fit')
-    axs[1].set_xlim([min(x0_min, x1_min), max(x0_max, x1_max)])
-    axs[1].set_ylim([min(y0_min, y1_min), max(y0_max, y1_max)])
-
-    fig.text(0.5, 0.04, 'Beam Divergence (°)', ha='center', va='center')
-    fig.text(0.06, 0.5, 'Normalize Intensity (a.u)', ha='center', va='center', rotation='vertical')
+    plt.title('Fast Axis : x axis, Slow Axis : y axis')
+    plt.legend(title=': data\n- fit')
+    plt.xlim([min(x0_min, x1_min), max(x0_max, x1_max)])
+    plt.ylim([min(y0_min, y1_min), max(y0_max, y1_max)])
+    plt.xlabel('Beam Divergence (°)')
+    plt.ylabel('Normalize Intensity (a.u)')
 
     if err[0]:
         plt.savefig(name+' error bar.png', dpi=150)
@@ -522,9 +517,6 @@ def LoadDataNF(file):
 def PlotNF(name, title, data, err, nb):
     '''plot Near Field analysis : fast axis and slow axis on two disctinct plot'''
 
-    fig, axs = plt.subplots(2, 1, figsize=(20, 20))
-    fig.suptitle(title)
-
     x0_min = Normalize(np.array(data[6][0][0],dtype=float)).min()
     x0_max = Normalize(np.array(data[6][0][0],dtype=float)).max()
     x1_min = Normalize(np.array(data[6][0][1],dtype=float)).min()
@@ -536,7 +528,12 @@ def PlotNF(name, title, data, err, nb):
 
     for i in range(nb):
 
-        color = (random.random(), random.random(), random.random())
+        if nb > 1:
+            color_0 = (random.random(), random.random(), random.random())
+            color_1 = color_0
+        else:
+            color_0 = 'blue'
+            color_1 = 'red'
 
         # resultat_FA = data[9][i][0]
         # resultat_SA = data[9][i][1]
@@ -549,16 +546,16 @@ def PlotNF(name, title, data, err, nb):
         y0_normalize = Normalize(y0)
         if (y0_normalize.min() < y0_min): y0_min = y0_normalize.min()
         if (y0_normalize.max() > y0_max): y0_max = y0_normalize.max()
-        axs[1].plot(x0, y0_normalize, linestyle = ':', color=color)
+        plt.plot(x0, y0_normalize, linestyle = ':', color=color_0, label='Fast Axis')
         if err[0]:
-            axs[1].errorbar(x0, y0_normalize, err[3], err[4])
+            plt.errorbar(x0, y0_normalize, err[3], err[4])
 
             #fitted Fast Axis
         x0_fit = np.array(data[6][i][0],dtype=float)
         y0_fit = GaussFunction(data[5][i][0], *data[7][i][0])
         y0_fit_normalize = Normalize(y0_fit)
-        axs[1].plot(x0_fit, y0_fit_normalize, linestyle = '-', color=color)
-        # axs[1].text(2.5, 0, '1/e^2: %.2f µm' %(resultat_FA), backgroundcolor='k', color='w')
+        plt.plot(x0_fit, y0_fit_normalize, linestyle = '-', color=color_0)
+        # plt.text(2.5, 0, '1/e^2: %.2f µm' %(resultat_FA), backgroundcolor='k', color='w')
 
             #Slow Axis
         x1 = np.array(data[6][i][1],dtype=float)
@@ -568,28 +565,23 @@ def PlotNF(name, title, data, err, nb):
         y1_normalize = Normalize(y1)
         if (y1_normalize.min() < y1_min): y1_min = y1_normalize.min()
         if (y1_normalize.max() > y1_max): y1_max = y1_normalize.max()
-        axs[0].plot(x1, y1_normalize, linestyle = ':', color=color)
+        plt.plot(x1, y1_normalize, linestyle = ':', color=color_1, label='Slow Axis')
         if err[0]:
-            axs[0].errorbar(x1, y1_normalize, err[3], err[4])
+            plt.errorbar(x1, y1_normalize, err[3], err[4])
 
             #fitted Slow Axis
         x1_fit = np.array(data[6][i][1],dtype=float)
         y1_fit = GaussFunction(data[5][i][1], *data[7][i][1])
         y1_fit_normalize = Normalize(y1_fit)
-        axs[0].plot(x1_fit, y1_fit_normalize, linestyle = '-', color=color)
-        # axs[0].text(2.5, 0, '1/e^2: %.2f µm' %(resultat_SA), backgroundcolor='k', color='w')
+        plt.plot(x1_fit, y1_fit_normalize, linestyle = '-', color=color_1)
+        # plt.text(2.5, 0, '1/e^2: %.2f µm' %(resultat_SA), backgroundcolor='k', color='w')
 
-    axs[1].set_title('Slow Axis : y axis')
-    axs[1].legend(title=': data\n- fit')
-    axs[1].set_xlim([min(x0_min, x1_min), max(x0_max, x1_max)])
-    axs[1].set_ylim([min(y0_min, y1_min), max(y0_max, y1_max)])
-    axs[0].set_title('Fast Axis : x axis')
-    axs[0].legend(title=': data\n- fit')
-    axs[0].set_xlim([min(x0_min, x1_min), max(x0_max, x1_max)])
-    axs[0].set_ylim([min(y0_min, y1_min), max(y0_max, y1_max)])
-
-    fig.text(0.5, 0.04, 'Latteral Position (µm)', ha='center', va='center')
-    fig.text(0.06, 0.5, 'Normalize Light Intensity (a.u)', ha='center', va='center', rotation='vertical')
+    plt.title('Fast Axis : x axis, Slow Axis : y axis')
+    plt.legend(title=': data\n- fit')
+    plt.xlim([min(x0_min, x1_min), max(x0_max, x1_max)])
+    plt.ylim([min(y0_min, y1_min), max(y0_max, y1_max)])
+    plt.xlabel('Latteral Position (µm)')
+    plt.ylabel('Normalize Light Intensity (a.u)')
 
     if err[0]:
         plt.savefig(name+' error bar.png', dpi=150)
@@ -637,7 +629,16 @@ def f1(a, x):
     #I(theta)*sin^3(theta)*cos(theta)
     return a*((np.sin(x))**3)*np.cos(x)
 
-def Petermann(data, lbd):
+def Gaussian(data, lbd, axis):
+    theta_FF = FWHM(GaussFunction(np.array(data[0], dtype=float), *FitGaussian(np.array(data[0], dtype=float), np.array(data[1], dtype=float))[0]))[1][0][0]
+    omega_0_gauss = lbd/(np.pi*(theta_FF*(np.pi/180)))
+    print(omega_0_gauss)
+    if axis==0:
+        return omega_0_gauss
+    else:
+        return 10*omega_0_gauss
+
+def Petermann(data, lbd, axis):
     theta_r = []
     for theta_d in data[0]:
         theta_r.append(theta_d*(np.pi/180)) #degree into radian conversion coef
@@ -648,16 +649,24 @@ def Petermann(data, lbd):
     y1 = f1(data[1], theta_r)
     I1 = sum(integrate.cumtrapz(y1, theta_r))
 
-    petermann = (lbd/np.pi)*np.sqrt((2*I0)/I1)
-    return petermann
+    petermann = (lbd/2*np.pi)*np.sqrt((2*I0)/I1)
+    if axis==0:
+        print((1/4)*petermann)
+        return (1/2)*petermann
+    else:
+        print((1/4)*petermann)
+        return (1/2)*petermann
 
 def BeamRadius(MFD, z, lbd):
     z_R = (np.pi/lbd)*(MFD/2)**2 #Rayleigh range
     omega = (MFD/2)*np.sqrt(1+((z/z_R)**2)) #Beam radius at distance z
     return omega
 
-def IntensityR(data, lbd, list_r):
-    MFD = Petermann(data, lbd)
+def IntensityR(data, lbd, list_r, modelisation, axis):
+    if modelisation == 0:
+        MFD = Gaussian(data, lbd, axis)
+    if modelisation == 1:
+        MFD = Petermann(data, lbd, axis)
     omega = 0.5*BeamRadius(MFD, 0, lbd)
     I = []
         #[r] = µm
@@ -675,11 +684,8 @@ def IntensityT(omega_0, lbd, list_t):
         I.append(np.exp(-2*((np.sin(t))**2)/((np.sin(theta_0))**2)))
     return I
 
-def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err, nb):
+def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err, nb, modelisation):
     '''plot Near Field analysis : fast axis and slow axis on two disctinct plot'''
-
-    fig, axs = plt.subplots(2, 1, figsize=(20, 20))
-    fig.suptitle(title)
 
     x0_min = Normalize(np.array(dataNF[6][0][0],dtype=float)).min()
     x0_max = Normalize(np.array(dataNF[6][0][0],dtype=float)).max()
@@ -693,12 +699,26 @@ def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
     i_ff = 0
     for i_nf in range(nb):
 
-        color = (random.random(), random.random(), random.random())
+        for i in range(nb):
+
+            if nb > 1:
+                color_0 = (random.random(), random.random(), random.random())
+                color_1 = color_0
+            else:
+                color_0 = 'blue'
+                color_1 = 'red'
 
         # resultat_FA = dataNF[9][i_nf][nf_fa]
         # resultat_SA = dataNF[9][i_nf][nf_sa]
         # resultat_FA_theory = Petermann(dataFF[i_ff+ff_fa], lbd)*1e6
         # resultat_SA_theory = Petermann(dataFF[i_ff+ff_sa], lbd)*1e6
+
+        fig, axs = plt.subplots(2, 1, figsize=(8, 6))
+        if modelisation == 0:
+            titlef = title+' Gauss modelisation'
+        else:
+           titlef = title+' PetermannII modelisation'
+        fig.suptitle(titlef)
 
             #Fast Axis
         x0 = np.array(dataNF[6][i_nf][nf_fa], dtype=float)
@@ -708,7 +728,7 @@ def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         y0_normalize = Normalize(y0)
         if (y0_normalize.min() < y0_min): y0_min = y0_normalize.min()
         if (y0_normalize.max() > y0_max): y0_max = y0_normalize.max()
-        axs[1].plot(x0, y0_normalize, linestyle = ':', color=color)
+        axs[0].plot(x0, y0_normalize, linestyle = ':', color=color_0)
         if err[0]:
             axs[0].errorbar(x0, y0_normalize, err[3], err[4])
 
@@ -716,14 +736,14 @@ def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         x0_fit = np.array(dataNF[6][i_nf][nf_fa], dtype=float)
         y0_fit = GaussFunction(dataNF[5][i_nf][nf_fa], *dataNF[7][i_nf][nf_fa])
         y0_fit_normalize = Normalize(y0_fit)
-        axs[0].plot(x0_fit, y0_fit_normalize, linestyle = '-', color=color)
+        axs[0].plot(x0_fit, y0_fit_normalize, linestyle = '-', color=color_0)
         # axs[0].text(2.0, 0.2, '1/e^2: %.2f µm' %(resultat_FA), backgroundcolor='k', color='w')
 
             #theory Fast Axis
         x0_theory = np.array(dataNF[6][i_nf][nf_fa], dtype=float)
-        y0_theory = np.array(IntensityR(dataFF[i_ff+ff_fa], lbd, dataNF[6][i_nf][nf_fa]), dtype=float)
+        y0_theory = np.array(IntensityR(dataFF[i_ff+ff_fa], lbd, dataNF[6][i_nf][nf_fa], modelisation, 0), dtype=float)
         y0_theory_normalize = Normalize(y0_theory)
-        axs[0].plot(x0_theory, y0_theory_normalize, linestyle = '-.', color=color)
+        axs[0].plot(x0_theory, y0_theory_normalize, linestyle = '-.', color=color_0)
         # axs[0].text(2.0, 0.0, '1/e^2 theory: %.2f µm' %(resultat_FA_theory), backgroundcolor='k', color='w')
 
             #Slow Axis
@@ -734,7 +754,7 @@ def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         y1_normalize = Normalize(y1)
         if (y1_normalize.min() < y1_min): y1_min = y1_normalize.min()
         if (y1_normalize.max() > y1_max): y1_max = y1_normalize.max()
-        axs[1].plot(x1, y1_normalize, linestyle = ':', color=color)
+        axs[1].plot(x1, y1_normalize, linestyle = ':', color=color_1)
         if err[0]:
             axs[1].errorbar(x1, y1_normalize, err[3], err[4])
 
@@ -742,34 +762,38 @@ def PlotFFtoNF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         x1_fit = np.array(dataNF[6][i_nf][nf_sa], dtype=float)
         y1_fit = GaussFunction(dataNF[5][i_nf][nf_sa], *dataNF[7][i_nf][nf_sa])
         y1_fit_normalize = Normalize(y1_fit)
-        axs[1].plot(x1_fit, y1_fit_normalize, linestyle = '-', color=color)
+        axs[1].plot(x1_fit, y1_fit_normalize, linestyle = '-', color=color_1)
         # axs[1].text(2.0, 0.2, '1/e^2: %.2f µm' %(resultat_SA), backgroundcolor='k', color='w')
 
             #theory Slow Axis
         x1_theory = np.array(dataNF[6][i_nf][nf_sa], dtype=float)
-        y1_theory = np.array(IntensityR(dataFF[i_ff+ff_sa], lbd, dataNF[6][i_nf][nf_sa]), dtype=float)
+        y1_theory = np.array(IntensityR(dataFF[i_ff+ff_sa], lbd, dataNF[6][i_nf][nf_sa], modelisation, 1), dtype=float)
         y1_theory_normalize = Normalize(y1_theory)
-        axs[1].plot(x1_theory, y1_theory_normalize, linestyle = '-.', color=color)
+        axs[1].plot(x1_theory, y1_theory_normalize, linestyle = '-.', color=color_1)
         # axs[1].text(2.0, 0.0, '1/e^2 theory: %.2f µm' %(resultat_SA_theory), backgroundcolor='k', color='w')
 
         i_ff += 2
 
     axs[0].set_title('Fast Axis : y  axis')
-    axs[0].legend(title=':data\n: fit\n-. theory')
+    axs[0].legend(title=':data\n: fit\n-. modelisation')
     axs[0].set_xlim([min(x0_min, x1_min), max(x0_max, x1_max)])
     axs[0].set_ylim([min(y0_min, y1_min), max(y0_max, y1_max)])
     axs[1].set_title('Slow Axis : x axis')
-    axs[1].legend(title=':data\n: fit\n-. theory')
+    axs[1].legend(title=':data\n: fit\n-. modelisation')
     axs[1].set_xlim([min(x0_min, x1_min), max(x0_max, x1_max)])
     axs[1].set_ylim([min(y0_min, y1_min), max(y0_max, y1_max)])
 
     fig.text(0.5, 0.04, 'Latteral Position (µm)', ha='center', va='center')
     fig.text(0.06, 0.5, 'Normalize Light Intensity (a.u)', ha='center', va='center', rotation='vertical')
 
-    if err[0]:
-        plt.savefig(name+' error bar.png', dpi=150)
+    if modelisation == 0:
+        namef = name+' Gauss'
     else:
-        plt.savefig(name+'.png', dpi=150)
+        namef = name+' PetermannII'
+    if err[0]:
+        plt.savefig(namef+' error bar.png', dpi=150)
+    else:
+        plt.savefig(namef+'.png', dpi=150)
 
 def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err, nb):
     '''plot Far Field analysis : fast axis and slow axis on the same plot'''
@@ -780,7 +804,7 @@ def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
     # resultat_FA_theory = FWHM(IntensityT(dataNF[9][i][nf_fa], lbd, dataFF[i+ff_fa][0]))[1][0][0]
     # resultat_SA_theory = FWHM(IntensityT(dataNF[9][i][nf_sa], lbd, dataFF[i+ff_sa][0]))[1][0][0]
 
-    fig, axs = plt.subplots(2, 1, figsize=(20, 20))
+    fig, axs = plt.subplots(2, 1, figsize=(8, 6))
     fig.suptitle(title)
 
     x0_min = np.array(dataFF[0][0],dtype=float).min()
@@ -795,7 +819,14 @@ def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
     i_ff = 0
     for i_nf in range(nb):
 
-        color = (random.random(), random.random(), random.random())
+        for i in range(nb):
+
+            if nb > 1:
+                color_0 = (random.random(), random.random(), random.random())
+                color_1 = color_0
+            else:
+                color_0 = 'blue'
+                color_1 = 'red'
 
             #Fast Axis
         x0 = np.array(dataFF[i_ff+ff_fa][0],dtype=float)
@@ -806,7 +837,7 @@ def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         x0_centre = Centre(x0, np.where(y0 == y0.max())[0])
         if (y0_normalize.min() < y0_min): y0_min = y0_normalize.min()
         if (y0_normalize.max() > y0_max): y0_max = y0_normalize.max()
-        axs[0].plot(x0_centre, y0_normalize, linestyle = ':', color=color)
+        axs[0].plot(x0_centre, y0_normalize, linestyle = ':', color=color_0)
         if err[0]:
             axs[0].errorbar(x0_centre, y0_normalize, err[1], err[2])
 
@@ -815,7 +846,7 @@ def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         y0_fit = GaussFunction(x0_fit, *FitGaussian(x0_fit, dataFF[i_ff+ff_fa][1])[0])
         x0_centre_fit = Centre(x0_fit, np.where(y0_fit == y0_fit.max())[0])
         y0_fit_normalize = Normalize(y0_fit)
-        axs[0].plot(x0_centre_fit, y0_fit_normalize, linestyle = '-', color=color)
+        axs[0].plot(x0_centre_fit, y0_fit_normalize, linestyle = '-', color=color_0)
         # axs[0].text(dataFF[i_ff][0][0]-3, 1-0.0, 'Fast Axis FWHM: %.2f' %(resultat_FA), backgroundcolor='k', color='w')
 
             #theory Fast Axis
@@ -823,7 +854,7 @@ def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         y0_theory = np.array(IntensityT(dataNF[9][i_nf][nf_fa], lbd, dataFF[i_ff+ff_fa][0]), dtype=float)
         x0_centre_theory = Centre(x0_theory, np.where(y0_theory == y0_theory.max())[0])
         y0_theory_normalize = Normalize(y0_theory)
-        axs[0].plot(x0_centre_theory, y0_theory_normalize, linestyle = '-.', color=color)
+        axs[0].plot(x0_centre_theory, y0_theory_normalize, linestyle = '-.', color=color_0)
         # axs[0].text(dataFF[i_ff][0][0]-3, 1-0.15, 'Fast Axis FWHM theory: %.2f' %(resultat_FA_theory), backgroundcolor='k', color='w')
 
             #Slow Axis
@@ -835,7 +866,7 @@ def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         y1_normalize = Normalize(y1)
         if (y1_normalize.min() < y1_min): y1_min = y1_normalize.min()
         if (y1_normalize.max() > y1_max): y1_max = y1_normalize.max()
-        axs[1].plot(x1, y1_normalize, linestyle = ':', color=color)
+        axs[1].plot(x1, y1_normalize, linestyle = ':', color=color_1)
         if err[0]:
             axs[1].errorbar(x1_centre, y1_normalize, err[1], err[2])
 
@@ -844,7 +875,7 @@ def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         y1_fit = GaussFunction(x1_fit, *FitGaussian(x1_fit, dataFF[i_ff+ff_sa][1])[0])
         x1_centre_fit = Centre(x1_fit, np.where(y1_fit == y1_fit.max())[0])
         y1_fit_normalize = Normalize(y1_fit)
-        axs[1].plot(x1_centre_fit, y1_fit_normalize, linestyle = '-', color=color)
+        axs[1].plot(x1_centre_fit, y1_fit_normalize, linestyle = '-', color=color_1)
         # axs[1].text(dataFF[i_ff][0][0]-3, 1-0.07, 'Slow Axis FWHM: %.2f'%(resultat_SA), backgroundcolor='k', color='w')
 
             #theory Slow Axis
@@ -852,7 +883,7 @@ def PlotNFtoFF(dataFF, dataNF, lbd, name, title, nf_fa, nf_sa, ff_fa, ff_sa, err
         y1_theory = np.array(IntensityT(dataNF[9][i_nf][nf_sa], lbd, dataFF[i_ff+ff_sa][0]), dtype=float)
         x1_centre_theory = Centre(x1_theory, np.where(y1_theory == y1_theory.max())[0])
         y1_theory_normalize = Normalize(y1_theory)
-        axs[1].plot(x1_centre_theory, y1_theory_normalize, linestyle = '-.', color=color)
+        axs[1].plot(x1_centre_theory, y1_theory_normalize, linestyle = '-.', color=color_1)
         # axs[1].text(dataFF[i_ff][0][0]-3, 1-0.22, 'Slow Axis FWHM theory: %.2f'%(resultat_SA_theory), backgroundcolor='k', color='w')
 
         i_ff += 2
@@ -883,15 +914,15 @@ def PrintFFtoNF(file, dataFF, dataNF, title, nf_fa, nf_sa, ff_fa, ff_sa, nb):
 
         resultat_FA = dataNF[9][i_nf][nf_fa]
         resultat_SA = dataNF[9][i_nf][nf_sa]
-        resultat_FA_theory = Petermann(dataFF[i_ff+ff_fa], lbd)*1e6
-        resultat_SA_theory = Petermann(dataFF[i_ff+ff_sa], lbd)*1e6
+        resultat_FA_theory = Petermann(dataFF[i_ff+ff_fa], lbd, 0)*1e6
+        resultat_SA_theory = Petermann(dataFF[i_ff+ff_sa], lbd, 1)*1e6
         err_FA = abs(resultat_FA-resultat_FA_theory)/resultat_FA_theory
         err_SA = abs(resultat_SA-resultat_SA_theory)/resultat_SA_theory
         file.writelines('\n\nFast Axis 1/e^2: %.2fµm' %(resultat_FA))
-        file.writelines('\nFast Axis 1/e^2 theory: %.2fµm' %(resultat_FA_theory))
+        file.writelines('\nFast Axis 1/e^2 PetermannII: %.2fµm' %(resultat_FA_theory))
         file.writelines('\nRelative error: %.2f' %(err_FA*100))
         file.writelines('\nSlow Axis 1/e^2: %.2fµm' %(resultat_SA))
-        file.writelines('\nSlow Axis 1/e^2 theory: %.2fµm' %(resultat_SA_theory))
+        file.writelines('\nSlow Axis 1/e^2 PetermannII: %.2fµm' %(resultat_SA_theory))
         file.writelines('\nRelative error: %.2f' %(err_SA*100))
 
         fit_parameters = FitGaussian(np.array(dataFF[i_ff+ff_fa][0], dtype=float), np.array(dataFF[i_ff+ff_fa][1], dtype=float))
@@ -935,9 +966,9 @@ def PrintNFtoFF(file, dataFF, dataNF, title, nf_fa, nf_sa, ff_fa, ff_sa, nb):
     file.close()
 
 nf_fa = 0 #THIS VALUE MIGHT CHANGE
-nf_sa = 1-nf_fa
+nf_sa = 1
 ff_fa = 1 #THIS VALUE MIGHT CHANGE
-ff_sa = 1-ff_fa
+ff_sa = 0
 
 ###
 if mode==4:
@@ -945,7 +976,7 @@ if mode==4:
         os.mkdir(Directory_FFtoNF)
     data_FF = LoadDataFF(Files(nb)[2])
     data_NF = LoadDataNF(Files(nb)[3])
-    PlotFFtoNF(data_FF, data_NF, lbd, URL_FFtoNF, title_FFtoNF, nf_fa, nf_sa, ff_fa, ff_sa, err, nb)
+    PlotFFtoNF(data_FF, data_NF, lbd, URL_FFtoNF, title_FFtoNF, nf_fa, nf_sa, ff_fa, ff_sa, err, nb, modelisation)
     PrintFFtoNF(file_FFtoNF, data_FF, data_NF, title_FFtoNF, nf_fa, nf_sa, ff_fa, ff_sa, nb)
 ###
 
