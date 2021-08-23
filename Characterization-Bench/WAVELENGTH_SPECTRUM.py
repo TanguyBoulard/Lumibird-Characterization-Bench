@@ -95,14 +95,14 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
     os.chdir(desktop)
     Number = str('%s/' %name)
-    Folder = str("\Wavelength Spectrum")
+    Folder = str("Wavelength Spectrum")
     mode = 0o666
     Directory = os.path.join(Number, Folder)
     if not os.path.exists(Directory):
         os.makedirs(Directory, mode)
     title = str("%s Wavelength Spectrum {T=%.2f°C}" %(name, T))
     file = str("%s/Wavelength Spectrum.txt" %Directory)
-    URL = str("%s/Wavelength Spectrum.png" %Directory)
+    URL = str("%s/Wavelength_Spectrum.png" %Directory)
 
     I = []
     for i in range(I_start, I_end + I_pas, I_pas):

@@ -57,7 +57,7 @@ def Data(name, I_start, I_end, I_pas, T, wavelength):
         os.makedirs(Directory, mode)
     title = str("Light-Current-Voltage Characteristics {T=%.2f°C}" % (T))
     file = str("%s/Light-Current-Voltage Characteristics.txt" % Directory)
-    URL = str("%s/Light-Current-Voltage Characteristics.png" % Directory)
+    URL = str("%s/Light_Current_Voltage_Characteristics.png" % Directory)
     
     I = [i for i in range(I_start, I_end + int(I_pas), int(I_pas))]
     U = []
