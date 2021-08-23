@@ -277,7 +277,7 @@ def PlotLIV(data, title, URL, nb):
 if mode==1:
     if not os.path.exists(Directory_LIV):
         os.mkdir(Directory_LIV)
-    data_LIV = LoadDataWS(Files(nb)[mode])
+    data_LIV = LoadDataLIV(Files(nb)[mode])
     PlotLIV(data_LIV, title_LIV, URL_LIV, nb)
 ###
 
