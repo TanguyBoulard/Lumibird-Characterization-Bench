@@ -17,6 +17,7 @@ import WAVELENGTH_SPECTRUM
 import tkinter as tk
 from functools import partial
 from tkinter import ttk
+from tkinter import messagebox
 
 import time
 
@@ -550,16 +551,27 @@ class Main(tk.Tk):
         self.geometry("300x200")
         self.title("Interface Homme-Machine")
 
+        messagebox.showinfo("Initialisation des instruments de mesure", "Merci de placer le bolomètre en position de mesure.")
+        ARDUINO.Write(port, b'b\r\n') # Sphere out
+        time.sleep(2)
+
+        messagebox.showinfo("Initialisation des instruments de mesure", "Merci de placer la sphère integrante en position de mesure.")
+        ARDUINO.Write(port, b'y\r\n') # Sphere out
+        time.sleep(2)
+        
+        messagebox.showinfo("Initialisation des instruments de mesure", "Merci de fermer le capot.")
+
         ttk.Button(self, text="Caractérisation", command=self.OpenCharacterization).pack(expand=True)
         ttk.Button(self, text="Vieillisement", command=self.OpenBurnIn).pack(expand=True)
         ttk.Button(self, text="Fermer", command=self.destroy).pack(expand=True)
 
     def OpenCharacterization(self):
+        messagebox.showinfo("Initialisation", "Merci de vérifier :\n * Mettre l\'OSA en protocole de communication GPIB")
         window = Characterization(self)
         window.grab_set()
 
     def OpenBurnIn(self):
-        # window = TIMER.Timer
+        messagebox.showinfo("Initialisation", "Merci de vérifier :\n * Mettre le chilleur en fonctionnement\n * Mettre l\'OSA en protocole de communication GPIB")
         window = BurnIn(self)
         window.grab_set()
 

@@ -32,8 +32,8 @@ def Plot(data, title, URL):
     axs[1].set_xlabel("Forward Current (mA)")
     axs[1].set_ylabel("Forward Voltage (V)")
 
-    plt.show()
     plt.savefig(URL, dpi=150)
+    plt.show()
     return 1
 
 def Print(file, data, title):
@@ -55,9 +55,9 @@ def Data(name, I_start, I_end, I_pas, T, wavelength):
     Directory = os.path.join(Name, Folder)
     if not os.path.exists(Directory):
         os.makedirs(Directory, mode)
-    title = str("Light-Current-Voltage Characteristics {T=%.2f°C}" % (T))
-    file = str("%s/Light-Current-Voltage Characteristics.txt" % Directory)
-    URL = str("%s/Light_Current_Voltage_Characteristics.png" % Directory)
+    title = str("Light-Current-Voltage Characteristics {T=%.2f°C}" %T)
+    file = str("%s/Light-Current-Voltage Characteristics.txt" %Directory)
+    URL = str("%s/Light_Current_Voltage_Characteristics.png" %Directory)
     
     I = [i for i in range(I_start, I_end + int(I_pas), int(I_pas))]
     U = []

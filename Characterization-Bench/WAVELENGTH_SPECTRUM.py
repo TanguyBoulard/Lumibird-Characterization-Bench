@@ -65,11 +65,16 @@ def SignalProcessing(X, Y, nb):
         liste.append(element[0])
     return liste[2:]
 
-def Plot(data, title, URL, I):
+def Plot(data, title, URL, I, file): 
     fig, axs = plt.subplots(1)
     fig.suptitle(title)
     normalize_level = []
     for i in range(len(data[1])):
+        f = open(str('{I=%.2f}' %I[i]), "w")
+        for element in data[1][i]:
+            f.writelines('\n')
+            f.writelines(str(element))
+        f.close()
         process = SignalProcessing(np.array(data[0]), np.array(data[1][i]), 3)
         peaks = FindPeaks(data)
         normalize_level.append(Normalize(np.array(process)))
@@ -79,8 +84,8 @@ def Plot(data, title, URL, I):
     axs.set_xlabel("Wavelength (nm)")
     axs.set_ylabel("Level (dB)")
     axs.legend()
-    plt.show()
     plt.savefig(URL, dpi=150)
+    plt.show()
 
 def Print(file0, data, title):
     file = open(file0, "w")
@@ -100,9 +105,10 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     Directory = os.path.join(Number, Folder)
     if not os.path.exists(Directory):
         os.makedirs(Directory, mode)
+    os.chdir(Directory)
     title = str("%s Wavelength Spectrum {T=%.2f°C}" %(name, T))
-    file = str("%s/Wavelength Spectrum.txt" %Directory)
-    URL = str("%s/Wavelength_Spectrum.png" %Directory)
+    file = str("Wavelength Spectrum.txt")
+    URL = str("Wavelength_Spectrum.png")
 
     I = []
     for i in range(I_start, I_end + I_pas, I_pas):

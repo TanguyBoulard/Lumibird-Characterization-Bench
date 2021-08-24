@@ -41,7 +41,14 @@ def OSA_OnePoint(wavelength, Span, VBW, res, Smppnt):
     OSA.Close(osa)
     return lbd
 
-def Timer(hours, mins, secs, port, I, T, wavelength, file, Span, VBW, res, Smppnt):
+def Timer(hours, mins, secs, port, I, T, wavelength, Span, VBW, res, Smppnt):
+    
+    title = str("Burn-in {T=%.2f°C, I=%.2fmA, t=%ih, %imin, %is}" % (float(T), float(I), int(hours), int(mins), int(secs)))
+    file_1h = str("Burn-in 1h.txt")
+    file_20min = str("Burn-in 20min.txt") 
+    f_1h = open(file_1h,"w")
+    f_1h.writelines(title)
+    
     t = hours*3600 + mins*60 + secs
     i = 0
     while t>=0:
@@ -52,25 +59,31 @@ def Timer(hours, mins, secs, port, I, T, wavelength, file, Span, VBW, res, Smppn
         time.sleep(1)
         t-=1
         i+=1
-        if ((i//60)==1) and (t > 100):
-            i-=60
+        if ((i%1200)==0) and (t > 20):
+            f_20min = open(file_20min,"w")
+            u_pow0, opt_pow0 = LIV_OnePoint(str(wavelength))
+            f_20min.writelines('t=%ih, %imin, %is\tU=%sV\tP_opt=%smW' %(int(hours), int(mins), int(secs), str(u_pow0), str(opt_pow0)))
+            f_20min.close()
+        if ((i%3600)==0) and (t > 100):
+            f_1h = open(file_1h,"w")
             # ARDUINO.Write(port, b'a\r\n') # Bolometer in
             # time.sleep(5)
             u_pow, opt_pow = LIV_OnePoint(str(wavelength))
-            file.writelines('\nI=%smA\tT=%s°C\tP_opt=%smW\tU=%sV' %(I, T, opt_pow, u_pow))
+            file_1h.writelines('\nI=%smA\tT=%s°C\tP_opt=%smW\tU=%sV' %(float(I), float(T), str(opt_pow), str(u_pow)))
             time.sleep(5)
             ARDUINO.Write(port, b'b\r\n') # Bolometer out
             time.sleep(5)
             ARDUINO.Write(port, b'z\r\n') # Sphere in
             time.sleep(5)
             peak = OSA_OnePoint(float(wavelength), Span, VBW, res, Smppnt)
-            file.writelines('\tlbd=%snm' %peak)
+            file_1h.writelines('\tlbd=%snm' %str(peak))
             time.sleep(5)
             ARDUINO.Write(port, b'y\r\n') # Sphere out
             time.sleep(5)
             ARDUINO.Write(port, b'a\r\n') # Bolometer in
             time.sleep(5)
             t-=100
+            f_1h.close()
     return 1
 
 def main(I, T, hours, mins, secs, port, wavelength, name, Span, VBW, res, Smppnt):
@@ -83,16 +96,12 @@ def main(I, T, hours, mins, secs, port, wavelength, name, Span, VBW, res, Smppnt
     Directory = os.path.join(Name, Folder)
     if not os.path.exists(Directory):
         os.makedirs(Directory, mode)
-    title = str("Burn-in {T=%.2f°C, I=%.2fmA, t=%ih, %imin, %is}" % (T, I, hours, mins, secs))
-    file = str("%s/Burn-in.txt" %Directory) 
-    f = open(file,"w")
-    f.writelines(title)
+    os.chdir(Directory)
 
     pro8000 = PRO8000.Initialize(T, I)
-    Timer(int(hours), int(mins), int(secs), port, I, T, wavelength, f, Span, VBW, res, Smppnt)
+    Timer(int(hours), int(mins), int(secs), port, I, T, wavelength, Span, VBW, res, Smppnt)
     PRO8000.Close(pro8000)
     
-    f.close()
     return 1
     
 
