@@ -42,13 +42,13 @@ def OSA_OnePoint(wavelength, Span, VBW, res, Smppnt):
     return lbd
 
 def Timer(hours, mins, secs, port, I, T, wavelength, Span, VBW, res, Smppnt):
-    
+
     title = str("Burn-in {T=%.2f°C, I=%.2fmA, t=%ih, %imin, %is}" % (float(T), float(I), int(hours), int(mins), int(secs)))
     file_1h = str("Burn-in 1h.txt")
-    file_20min = str("Burn-in 20min.txt") 
+    file_20min = str("Burn-in 20min.txt")
     f_1h = open(file_1h,"w")
     f_1h.writelines(title)
-    
+
     t = hours*3600 + mins*60 + secs
     i = 0
     while t>=0:
@@ -59,7 +59,7 @@ def Timer(hours, mins, secs, port, I, T, wavelength, Span, VBW, res, Smppnt):
         time.sleep(1)
         t-=1
         i+=1
-        if ((i%1200)==0) and (t > 20):
+        if ((i%1200)==0) and (t > 20) and ((i%3600)!=0):
             f_20min = open(file_20min,"w")
             u_pow0, opt_pow0 = LIV_OnePoint(str(wavelength))
             f_20min.writelines('t=%ih, %imin, %is\tU=%sV\tP_opt=%smW' %(int(hours), int(mins), int(secs), str(u_pow0), str(opt_pow0)))
@@ -101,9 +101,9 @@ def main(I, T, hours, mins, secs, port, wavelength, name, Span, VBW, res, Smppnt
     pro8000 = PRO8000.Initialize(T, I)
     Timer(int(hours), int(mins), int(secs), port, I, T, wavelength, Span, VBW, res, Smppnt)
     PRO8000.Close(pro8000)
-    
+
     return 1
-    
+
 
 def Stop():
     rm = pyvisa.ResourceManager()
