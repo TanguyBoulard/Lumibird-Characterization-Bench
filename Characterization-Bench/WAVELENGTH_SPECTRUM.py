@@ -70,7 +70,7 @@ def Plot(data, title, URL, I):
     fig.suptitle(title)
     normalize_level = []
     for i in range(len(data[1])):
-        f = open(str('{I=%.2f}' %I[i]), "w")
+        f = open(str('{I=%.2f}.txt' %I[i]), "w")
         for element in data[1][i]:
             f.writelines('\n')
             f.writelines(str(element))
@@ -108,7 +108,7 @@ def Data(name, I_start, I_end, I_pas, T, wavelength, Span, VBW, res, Smppnt):
     os.chdir(Directory)
     title = str("%s Wavelength Spectrum {T=%.2f°C}" %(name, T))
     file = str("Wavelength Spectrum.txt")
-    URL = str("Wavelength_Spectrum.png")
+    URL = str("Wavelength Spectrum.png")
 
     I = []
     for i in range(I_start, I_end + I_pas, I_pas):

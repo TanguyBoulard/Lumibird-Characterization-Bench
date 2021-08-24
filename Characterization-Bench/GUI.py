@@ -578,4 +578,5 @@ class Main(tk.Tk):
 app = Main()
 app.mainloop()
 
+ARDUINO.Write(port, b's\r\n')
 port.close()

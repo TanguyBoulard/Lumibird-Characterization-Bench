@@ -35,7 +35,7 @@ def Query(instrument, command):
 
 def Error(instrument):
     err = instrument.query("ERR?")
-    if err != "000\r\n":
+    if (err != "000\r\n") and (err != "101\r\n") :
         print(err, end="\n\r")
         # sys.exit()
     return 1

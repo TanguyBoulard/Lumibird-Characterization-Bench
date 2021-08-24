@@ -44,7 +44,7 @@ def OSA_OnePoint(wavelength, Span, VBW, res, Smppnt):
 def Timer(hours, mins, secs, port, I, T, wavelength, Span, VBW, res, Smppnt):
 
     title = str("Burn-in {T=%.2f°C, I=%.2fmA, t=%ih, %imin, %is}" % (float(T), float(I), int(hours), int(mins), int(secs))) 
-    f_1h = open(str("Burn-in 1h.txt"),"w+")
+    f_1h = open(str("Burn-in 1h.txt"),"w")
     f_1h.writelines(title)
     f_1h.close()
 
@@ -59,13 +59,13 @@ def Timer(hours, mins, secs, port, I, T, wavelength, Span, VBW, res, Smppnt):
         t-=1
         i+=1
         if ((i%1200)==0) and (t > 20) and ((i%3600)!=0):
-            f_20min = open(str("Burn-in 20min.txt"),"w+")
+            f_20min = open(str("Burn-in 20min.txt"),"a+")
             u_pow0, opt_pow0 = LIV_OnePoint(str(wavelength))
             f_20min.writelines('t=%ih, %imin, %is\tU=%sV\tP_opt=%smW' %(int(i%3600), int(i%60), int(0), str(u_pow0), str(opt_pow0)))
             f_20min.close()
             t-=10
-        if ((i%100)==0) and (t > 100):
-            f_1h = open(str("Burn-in 1h.txt"),"w+")
+        if ((i%3600)==0) and (t > 100):
+            f_1h = open(str("Burn-in 1h.txt"),"a+")
             # ARDUINO.Write(port, b'a\r\n') # Bolometer in
             # time.sleep(5)
             u_pow, opt_pow = LIV_OnePoint(str(wavelength))
