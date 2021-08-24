@@ -28,7 +28,7 @@ def LIV_OnePoint(wavelength):
     multimeter = KEYSIGHT.Initialize()
     bolometer = P_LINK.Initialize(str(wavelength))
     u_pow = KEYSIGHT.Read(multimeter)
-    opt_pow = P_LINK.Read(bolometer)
+    opt_pow = (P_LINK.Read(bolometer))* 1E3
     KEYSIGHT.Close(multimeter)
     P_LINK.Close(bolometer)
     return str(u_pow), str(opt_pow)
@@ -43,11 +43,10 @@ def OSA_OnePoint(wavelength, Span, VBW, res, Smppnt):
 
 def Timer(hours, mins, secs, port, I, T, wavelength, Span, VBW, res, Smppnt):
 
-    title = str("Burn-in {T=%.2f°C, I=%.2fmA, t=%ih, %imin, %is}" % (float(T), float(I), int(hours), int(mins), int(secs)))
-    file_1h = str("Burn-in 1h.txt")
-    file_20min = str("Burn-in 20min.txt")
-    f_1h = open(file_1h,"w")
+    title = str("Burn-in {T=%.2f°C, I=%.2fmA, t=%ih, %imin, %is}" % (float(T), float(I), int(hours), int(mins), int(secs))) 
+    f_1h = open(str("Burn-in 1h.txt"),"w+")
     f_1h.writelines(title)
+    f_1h.close()
 
     t = hours*3600 + mins*60 + secs
     i = 0
@@ -60,23 +59,24 @@ def Timer(hours, mins, secs, port, I, T, wavelength, Span, VBW, res, Smppnt):
         t-=1
         i+=1
         if ((i%1200)==0) and (t > 20) and ((i%3600)!=0):
-            f_20min = open(file_20min,"w")
+            f_20min = open(str("Burn-in 20min.txt"),"w+")
             u_pow0, opt_pow0 = LIV_OnePoint(str(wavelength))
-            f_20min.writelines('t=%ih, %imin, %is\tU=%sV\tP_opt=%smW' %(int(hours), int(mins), int(secs), str(u_pow0), str(opt_pow0)))
+            f_20min.writelines('t=%ih, %imin, %is\tU=%sV\tP_opt=%smW' %(int(i%3600), int(i%60), int(0), str(u_pow0), str(opt_pow0)))
             f_20min.close()
-        if ((i%3600)==0) and (t > 100):
-            f_1h = open(file_1h,"w")
+            t-=10
+        if ((i%100)==0) and (t > 100):
+            f_1h = open(str("Burn-in 1h.txt"),"w+")
             # ARDUINO.Write(port, b'a\r\n') # Bolometer in
             # time.sleep(5)
             u_pow, opt_pow = LIV_OnePoint(str(wavelength))
-            file_1h.writelines('\nI=%smA\tT=%s°C\tP_opt=%smW\tU=%sV' %(float(I), float(T), str(opt_pow), str(u_pow)))
+            f_1h.writelines('\nI=%fmA\tT=%f°C\tP_opt=%smW\tU=%sV' %(float(I), float(T), str(opt_pow), str(u_pow)))
             time.sleep(5)
             ARDUINO.Write(port, b'b\r\n') # Bolometer out
             time.sleep(5)
             ARDUINO.Write(port, b'z\r\n') # Sphere in
             time.sleep(5)
             peak = OSA_OnePoint(float(wavelength), Span, VBW, res, Smppnt)
-            file_1h.writelines('\tlbd=%snm' %str(peak))
+            f_1h.writelines('\tlbd=%snm' %str(peak))
             time.sleep(5)
             ARDUINO.Write(port, b'y\r\n') # Sphere out
             time.sleep(5)

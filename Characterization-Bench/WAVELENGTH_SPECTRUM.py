@@ -65,7 +65,7 @@ def SignalProcessing(X, Y, nb):
         liste.append(element[0])
     return liste[2:]
 
-def Plot(data, title, URL, I, file): 
+def Plot(data, title, URL, I): 
     fig, axs = plt.subplots(1)
     fig.suptitle(title)
     normalize_level = []
